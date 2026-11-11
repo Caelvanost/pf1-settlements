@@ -1,0 +1,120 @@
+<section class="faction-network-shell">
+  <header class="faction-network-header">
+    <div>
+      <strong><i class="fas fa-diagram-project"></i> Réseau politique et factions</strong>
+      <p>Vue d'ensemble des relations entre factions et, pour une communauté donnée, des tensions politiques enregistrées.</p>
+    </div>
+    <div class="faction-network-controls">
+      <label>Communauté
+        <select data-action="settlement-filter">
+          {{#each settlements}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}
+        </select>
+      </label>
+      <label class="network-check"><input type="checkbox" data-action="toggle-neutral" {{#if showNeutral}}checked{{/if}}> Afficher les relations neutres</label>
+    </div>
+  </header>
+
+  <section class="pf1-overview-dashboard faction-network-dashboard" aria-label="Résumé du réseau">
+    <div class="dashboard-stat"><span>Factions</span><strong>{{stats.factions}}</strong></div>
+    <div class="dashboard-stat"><span>Relations visibles</span><strong>{{stats.relations}}</strong></div>
+    <div class="dashboard-stat"><span>Tensions</span><strong>{{stats.tensions}}</strong></div>
+    <div class="dashboard-stat"><span>Conflits sérieux</span><strong>{{stats.conflicts}}</strong></div>
+  </section>
+
+  <div class="network-context-line"><i class="fas fa-location-dot"></i> <strong>{{selectedSettlementName}}</strong></div>
+
+  {{#if hasFactions}}
+  <div class="faction-network-layout">
+    <section class="faction-network-graph-panel">
+      <svg class="faction-network-svg" viewBox="0 0 900 600" role="img" aria-label="Graphe des relations entre factions">
+        <g class="network-relations-layer">
+          {{#each relationEdges}}
+          <line class="network-relation-edge {{status}}" x1="{{x1}}" y1="{{y1}}" x2="{{x2}}" y2="{{y2}}">
+            <title>{{sourceName}} ↔ {{targetName}} — {{statusLabel}}{{#if notes}} — {{notes}}{{/if}}</title>
+          </line>
+          {{/each}}
+        </g>
+        <g class="network-tensions-layer">
+          {{#each tensionEdges}}
+          <line class="network-tension-edge {{cssClass}}" x1="{{x1}}" y1="{{y1}}" x2="{{x2}}" y2="{{y2}}">
+            <title>{{sourceName}} ↔ {{targetName}} — {{levelLabel}} · {{trendLabel}}{{#if issue}} — {{issue}}{{/if}}</title>
+          </line>
+          {{/each}}
+        </g>
+        <g class="network-nodes-layer">
+          {{#each nodes}}
+          <g class="network-faction-node" transform="translate({{x}} {{y}})" data-action="open-faction" data-id="{{id}}" tabindex="0" role="button" aria-label="Ouvrir la faction {{name}}">
+            <circle r="48"><title>{{name}} — {{type}} — {{influenceSummary}}</title></circle>
+            <text class="network-node-name" text-anchor="middle" y="-3">{{shortName}}</text>
+            <text class="network-node-type" text-anchor="middle" y="15">{{type}}</text>
+          </g>
+          {{/each}}
+        </g>
+      </svg>
+
+      <div class="faction-network-legend" aria-label="Légende">
+        <span class="legend-title">Relations :</span>
+        <span><i class="legend-line allied"></i> Alliée</span>
+        <span><i class="legend-line friendly"></i> Amicale</span>
+        <span><i class="legend-line rival"></i> Rivale</span>
+        <span><i class="legend-line enemy"></i> Ennemie</span>
+        {{#if showNeutral}}<span><i class="legend-line neutral"></i> Neutre</span>{{/if}}
+        {{#if selectedSettlementId}}<span class="legend-title">Tensions :</span><span><i class="legend-line tension"></i> Suivi politique</span>{{/if}}
+      </div>
+    </section>
+
+    <aside class="faction-network-side">
+      <section class="panel network-side-panel">
+        <div class="panel-title-row"><div><h3>Factions visibles</h3><p>Cliquer pour ouvrir la fiche.</p></div></div>
+        <ol class="network-faction-list">
+          {{#each factionCards}}
+          <li>
+            <button type="button" data-action="open-faction" data-id="{{id}}">
+              <strong>{{name}}</strong>
+              <small>{{type}} · {{visibleRelationCount}} relation(s) visible(s)</small>
+              <small>{{influenceSummary}}</small>
+            </button>
+          </li>
+          {{/each}}
+        </ol>
+      </section>
+
+      {{#if selectedSettlementId}}
+      <section class="panel network-side-panel">
+        <div class="panel-title-row"><div><h3>Tensions politiques</h3><p>Données issues de la section Politique de la communauté.</p></div></div>
+        {{#if hasTensions}}
+        <ol class="network-tension-list">
+          {{#each tensions}}
+          <li class="{{cssClass}}">
+            <strong>{{sourceName}} ↔ {{targetName}}</strong>
+            <small>{{levelLabel}} · {{trendLabel}}</small>
+            {{#if issue}}<p>{{issue}}</p>{{/if}}
+          </li>
+          {{/each}}
+        </ol>
+        {{else}}
+        <div class="empty-box">Aucune tension factionnelle enregistrée pour cette communauté.</div>
+        {{/if}}
+      </section>
+      {{/if}}
+
+      <section class="panel network-side-panel">
+        <div class="panel-title-row"><div><h3>Relations visibles</h3><p>Les relations neutres peuvent être masquées pour alléger le graphe.</p></div></div>
+        {{#if hasRelations}}
+        <ol class="network-relation-list">
+          {{#each relationEdges}}
+          <li class="{{status}}"><strong>{{sourceName}} ↔ {{targetName}}</strong><small>{{statusLabel}}{{#if notes}} · {{notes}}{{/if}}</small></li>
+          {{/each}}
+        </ol>
+        {{else}}
+        <div class="empty-box">Aucune relation visible avec le filtre actuel.</div>
+        {{/if}}
+      </section>
+    </aside>
+  </div>
+  {{else}}
+  <div class="empty-box faction-network-empty"><i class="fas fa-people-group"></i> Aucune faction n'est active dans cette sélection.</div>
+  {{/if}}
+
+  <p class="small-note network-disclaimer">Cette vue ne crée aucune nouvelle règle PF1 : elle synthétise les influences, relations et tensions déjà enregistrées dans le module.</p>
+</section>

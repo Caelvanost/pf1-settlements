@@ -1,0 +1,52 @@
+name: Release PF1 Settlements
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "module.json"
+      - ".github/workflows/release.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read module version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(jq -r '.version' module.json)"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build Foundry module archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.version.outputs.version }}"
+          mkdir -p dist
+          zip -qr "dist/pf1-settlements-v${VERSION}.zip"             module.json README.md scripts styles templates lang
+
+      - name: Create or update GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG="${{ steps.version.outputs.tag }}"
+          ASSET="dist/pf1-settlements-v${VERSION}.zip"
+
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ASSET" --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$TAG" "$ASSET"               --repo "$GITHUB_REPOSITORY"               --target "$GITHUB_SHA"               --title "PF1 Settlements v${VERSION}"               --notes "PF1 Settlements v${VERSION} — module de gestion avancée des villes et communautés pour Foundry VTT v13 et Pathfinder 1."
+          fi

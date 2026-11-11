@@ -1,0 +1,62 @@
+<section class="settlement-generator-shell">
+  <header class="generator-header">
+    <div><strong>Assistant de création de communauté</strong><p>Les caractéristiques mécaniques utilisent les profils du Guide du Maître PF1. Les noms, lieux, factions, lois et rumeurs proposés sont des aides du module.</p></div>
+    <div class="generator-step">Étape {{step}} / 4</div>
+  </header>
+
+  {{#if isStep1}}
+  <section class="panel">
+    <h2>1. Identité et taille</h2>
+    <div class="form-grid two-col">
+      <label>Nom<input type="text" name="name" value="{{state.name}}"></label>
+      <label>Nature<select name="kind"><option value="settlement" {{#if state.kindSettlement}}selected{{/if}}>Ville / communauté</option><option value="district" {{#if state.kindDistrict}}selected{{/if}}>Quartier</option></select></label>
+      <label>Ville parente<select name="parentSettlementId"><option value="">— Aucune —</option>{{#each roots}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}</select></label>
+      <label>Type<select name="type">{{#each types}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
+      <label>Population<input type="number" min="0" name="population" value="{{state.population}}"></label>
+    </div>
+    <p class="small-note">La taille détermine le modificateur de base, le Danger, le nombre d'avantages et les valeurs de marché.</p>
+  </section>
+  {{/if}}
+
+  {{#if isStep2}}
+  <section class="panel">
+    <div class="panel-title-row"><div><h2>2. Profil PF1</h2><p class="small-note">Tu peux choisir manuellement ou utiliser le tirage assisté. Ce tirage n'est pas une table officielle.</p></div><button type="button" data-action="randomize"><i class="fas fa-dice"></i> Proposition aléatoire</button></div>
+    <div class="form-grid two-col">
+      <label>Alignement<select name="alignment">{{#each alignments}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
+      <label>Gouvernement<select name="government">{{#each governments}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></label>
+    </div>
+    <h3>Avantages — maximum conseillé : {{maxAdvantages}}</h3>
+    <div class="generator-choice-grid">{{#each advantages}}<label class="trait-card"><span class="trait-title"><input type="checkbox" name="advantages" value="{{key}}" {{#if checked}}checked{{/if}}> {{label}}</span><span class="trait-description">{{description}}</span></label>{{/each}}</div>
+    <h3>Inconvénients</h3>
+    <div class="generator-choice-grid">{{#each drawbacks}}<label class="trait-card"><span class="trait-title"><input type="checkbox" name="drawbacks" value="{{key}}" {{#if checked}}checked{{/if}}> {{label}}</span><span class="trait-description">{{description}}</span></label>{{/each}}</div>
+  </section>
+  {{/if}}
+
+  {{#if isStep3}}
+  <section class="panel">
+    <h2>3. Contenu assisté</h2>
+    <p class="small-note">Ces éléments sont volontairement génériques et explicitement marqués comme propositions du module.</p>
+    <div class="generator-content-options">
+      <label><input type="checkbox" name="generateLocations" {{#if state.generateLocations}}checked{{/if}}> Générer des lieux</label><input type="number" min="0" max="10" name="locationCount" value="{{state.locationCount}}">
+      <label><input type="checkbox" name="generateFactions" {{#if state.generateFactions}}checked{{/if}}> Générer des factions</label><input type="number" min="0" max="6" name="factionCount" value="{{state.factionCount}}">
+      <label><input type="checkbox" name="generateRumors" {{#if state.generateRumors}}checked{{/if}}> Générer des rumeurs</label><input type="number" min="0" max="6" name="rumorCount" value="{{state.rumorCount}}">
+      <label><input type="checkbox" name="generateLaws" {{#if state.generateLaws}}checked{{/if}}> Générer des réglementations</label><input type="number" min="0" max="3" name="lawCount" value="{{state.lawCount}}">
+    </div>
+  </section>
+  {{/if}}
+
+  {{#if isStep4}}
+  <section class="panel generator-summary">
+    <h2>4. Résumé</h2>
+    <dl><dt>Nom</dt><dd>{{state.name}}</dd><dt>Type</dt><dd>{{typeLabel}}</dd><dt>Population</dt><dd>{{state.population}}</dd><dt>Alignement</dt><dd>{{alignmentLabel}}</dd><dt>Gouvernement</dt><dd>{{governmentLabel}}</dd><dt>Avantages</dt><dd>{{advantageLabels}}</dd><dt>Inconvénients</dt><dd>{{drawbackLabels}}</dd></dl>
+    <div class="generator-warning"><i class="fas fa-circle-info"></i> Les valeurs PF1 seront calculées par le moteur normal du module. Les éléments narratifs générés restent des propositions à éditer.</div>
+  </section>
+  {{/if}}
+
+  <footer class="generator-footer">
+    {{#unless isStep1}}<button type="button" data-action="back"><i class="fas fa-arrow-left"></i> Retour</button>{{/unless}}
+    <span></span>
+    {{#unless isStep4}}<button type="button" data-action="next">Suivant <i class="fas fa-arrow-right"></i></button>{{/unless}}
+    {{#if isStep4}}<button type="button" data-action="create" class="primary"><i class="fas fa-wand-magic-sparkles"></i> Créer la communauté</button>{{/if}}
+  </footer>
+</section>

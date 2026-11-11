@@ -1,0 +1,136 @@
+<form class="faction-shell {{cssClass}}" autocomplete="off">
+  <header class="faction-header">
+    <div class="title-group">
+      <i class="fas fa-people-group faction-icon"></i>
+      <div>
+        <input class="faction-name" type="text" name="name" value="{{name}}" placeholder="Nom de la faction">
+        <div class="faction-subtitle">Organisation, guilde, culte, famille, autorité ou réseau actif dans les communautés PF1</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      {{#if headquarters}}<button type="button" data-action="open-hq" data-id="{{headquarters.id}}"><i class="fas fa-location-dot"></i> Siège</button>{{/if}}
+      <button type="button" data-action="open-faction-network"><i class="fas fa-diagram-project"></i> Réseau</button>
+      <button type="button" data-action="post-faction"><i class="fas fa-comment"></i> Envoyer au chat</button>
+    </div>
+  </header>
+
+  <section class="pf1-overview-dashboard faction-dashboard" aria-label="Vue d'ensemble de la faction">
+    <div class="dashboard-stat"><span>Type</span><strong>{{dashboard.type}}</strong></div>
+    <div class="dashboard-stat"><span>Chef</span><strong>{{dashboard.leaderName}}</strong></div>
+    <div class="dashboard-stat"><span>Siège</span><strong>{{dashboard.headquartersName}}</strong></div>
+    <div class="dashboard-stat"><span>Influences</span><strong>{{dashboard.influenceCount}}</strong></div>
+    <div class="dashboard-stat"><span>Relations</span><strong>{{dashboard.relationCount}}</strong></div>
+  </section>
+
+  <nav class="pf1-sheet-nav faction-sheet-nav" aria-label="Navigation rapide dans la fiche de faction">
+    <button type="button" data-jump-section="pf1-faction-profile"><i class="fas fa-id-card"></i> Profil</button>
+    <button type="button" data-jump-section="pf1-faction-influences"><i class="fas fa-map-location-dot"></i> Influences</button>
+    <button type="button" data-jump-section="pf1-faction-relations"><i class="fas fa-link"></i> Relations</button>
+    <button type="button" data-jump-section="pf1-faction-details"><i class="fas fa-scroll"></i> Détails</button>
+  </nav>
+
+  <section id="pf1-faction-profile" class="faction-grid top-grid pf1-scroll-target">
+    <div class="panel">
+      <h2>Identité</h2>
+      <div class="form-grid two">
+        <label>Type
+          <select name="faction.type">
+            {{#each factionTypes}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+          </select>
+        </label>
+        <label>Siège / quartier général
+          <select name="faction.headquartersLocationId">
+            <option value="">Aucun lieu lié</option>
+            {{#each locations}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}{{#if suffix}} — {{suffix}}{{/if}}</option>{{/each}}
+          </select>
+        </label>
+      </div>
+      <label>Mots-clés
+        <input type="text" name="faction.tags" value="{{config.tags}}" placeholder="ex. pirates, marchands, religieux, clandestin">
+      </label>
+      <label>Description publique
+        <textarea name="faction.description" rows="7" placeholder="Ce que l'on sait publiquement de cette organisation...">{{config.description}}</textarea>
+      </label>
+    </div>
+
+    <div class="panel">
+      <h2>Chef / représentant</h2>
+      <div class="faction-leader-drop-zone">
+        {{#if leader}}
+        <div class="faction-leader-card">
+          <img src="{{leader.img}}" alt="">
+          <div><strong>{{leader.name}}</strong><small>Actor PF1 lié</small></div>
+          <div class="npc-actions">
+            <button type="button" data-action="open-leader"><i class="fas fa-arrow-up-right-from-square"></i></button>
+            <button type="button" data-action="remove-leader"><i class="fas fa-link-slash"></i></button>
+          </div>
+        </div>
+        {{else}}
+        <div class="empty-box">{{#if leaderMissing}}Le chef précédemment lié est introuvable.{{else}}Aucun chef lié.{{/if}}</div>
+        {{/if}}
+      </div>
+      <button type="button" data-action="pick-leader"><i class="fas fa-user-plus"></i> Choisir un Actor</button>
+      <p class="small-note">Tu peux aussi glisser-déposer un Actor PF1 dans cette zone.</p>
+    </div>
+  </section>
+
+  <section id="pf1-faction-influences" class="panel faction-influence-panel pf1-scroll-target">
+    <div class="panel-title-row">
+      <div>
+        <h2>Influence territoriale</h2>
+        <p class="small-note">Une faction peut agir dans plusieurs villes et quartiers, avec un degré d'influence différent dans chacun.</p>
+      </div>
+      <button type="button" data-action="add-influence"><i class="fas fa-plus"></i> Ajouter une zone</button>
+    </div>
+    {{#if hasInfluences}}
+    <ol class="faction-influence-list">
+      {{#each influences}}
+      <li class="{{#if missing}}missing{{/if}}">
+        <div class="faction-summary">
+          <strong>{{settlementName}}{{#if districtName}} — {{districtName}}{{/if}}</strong>
+          <small>{{levelLabel}}{{#if notes}} · {{notes}}{{/if}}</small>
+        </div>
+        <div class="faction-row-actions">
+          {{#if districtId}}<button type="button" data-action="open-influence" data-id="{{districtId}}"><i class="fas fa-map-location-dot"></i></button>{{else}}<button type="button" data-action="open-influence" data-id="{{settlementId}}"><i class="fas fa-city"></i></button>{{/if}}
+          <button type="button" data-action="remove-influence" data-index="{{index}}"><i class="fas fa-trash"></i></button>
+        </div>
+      </li>
+      {{/each}}
+    </ol>
+    {{else}}<div class="empty-box">Aucune zone d'influence définie.</div>{{/if}}
+  </section>
+
+  <section id="pf1-faction-relations" class="panel faction-relations-panel pf1-scroll-target">
+    <div class="panel-title-row">
+      <div>
+        <h2>Relations avec les autres factions</h2>
+        <p class="small-note">Les relations sont synchronisées sur les deux fiches concernées.</p>
+      </div>
+      <button type="button" data-action="add-relation"><i class="fas fa-link"></i> Ajouter / modifier</button>
+    </div>
+    {{#if hasRelations}}
+    <ol class="faction-relation-list">
+      {{#each relations}}
+      <li class="{{status}} {{#if missing}}missing{{/if}}">
+        <div class="faction-summary"><strong>{{name}}</strong><small>{{statusLabel}}{{#if notes}} · {{notes}}{{/if}}</small></div>
+        <div class="faction-row-actions">
+          <button type="button" data-action="open-relation" data-id="{{factionId}}"><i class="fas fa-arrow-up-right-from-square"></i></button>
+          <button type="button" data-action="remove-relation" data-id="{{factionId}}"><i class="fas fa-link-slash"></i></button>
+        </div>
+      </li>
+      {{/each}}
+    </ol>
+    {{else}}<div class="empty-box">Aucune relation définie.</div>{{/if}}
+  </section>
+
+  <section id="pf1-faction-details" class="faction-grid two-columns pf1-scroll-target">
+    <div class="panel"><h2>Objectifs</h2><textarea name="faction.goals" rows="7">{{config.goals}}</textarea></div>
+    <div class="panel"><h2>Ressources et moyens</h2><textarea name="faction.resources" rows="7">{{config.resources}}</textarea></div>
+    <div class="panel"><h2>Méthodes / activités</h2><textarea name="faction.methods" rows="7">{{config.methods}}</textarea></div>
+    <div class="panel"><h2>Rumeurs / accroches</h2><textarea name="faction.rumors" rows="7">{{config.rumors}}</textarea></div>
+    <div class="panel gm-secret-panel"><h2><i class="fas fa-user-secret"></i> Secrets du MJ</h2><textarea name="faction.secrets" rows="7">{{config.secrets}}</textarea></div>
+    <div class="panel"><h2>Notes</h2><textarea name="faction.notes" rows="7">{{config.notes}}</textarea></div>
+  </section>
+
+  <footer class="settlement-footer"><button type="submit"><i class="fas fa-floppy-disk"></i> Enregistrer</button></footer>
+</form>

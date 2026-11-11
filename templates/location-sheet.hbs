@@ -1,0 +1,103 @@
+<form class="location-shell {{cssClass}}" autocomplete="off">
+  <header class="location-header">
+    <div class="title-group">
+      <i class="fas fa-shop location-icon"></i>
+      <div>
+        <input class="location-name" type="text" name="name" value="{{name}}" placeholder="Nom du lieu">
+        <div class="location-subtitle">Lieu, établissement ou bâtiment lié à une communauté PF1</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      {{#if rootSettlement}}<button type="button" data-action="open-settlement" data-id="{{rootSettlement.id}}"><i class="fas fa-city"></i> Ville</button>{{/if}}
+      {{#if district}}<button type="button" data-action="open-district" data-id="{{district.id}}"><i class="fas fa-map-location-dot"></i> Quartier</button>{{/if}}
+      <button type="button" data-action="post-location"><i class="fas fa-comment"></i> Envoyer au chat</button>
+    </div>
+  </header>
+
+  <section class="location-grid top-grid">
+    <div class="panel">
+      <h2>Identité et rattachement</h2>
+      <div class="form-grid two">
+        <label>Type
+          <select name="location.type">
+            {{#each locationTypes}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+          </select>
+        </label>
+        <label>Niveau de prix
+          <select name="location.priceLevel">
+            {{#each priceLevels}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+          </select>
+        </label>
+        <label>Ville / communauté
+          <select name="location.settlementId">
+            <option value="">Aucune</option>
+            {{#each settlements}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}
+          </select>
+        </label>
+        <label>Quartier
+          <select name="location.districtId">
+            <option value="">Aucun / ville entière</option>
+            {{#each districts}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}
+          </select>
+          <span class="field-hint">Si tu changes de ville, enregistre une première fois pour actualiser la liste des quartiers.</span>
+        </label>
+      </div>
+      <label>Adresse / emplacement
+        <input type="text" name="location.address" value="{{config.address}}" placeholder="ex. Quai des Écumeurs, près de la porte sud...">
+      </label>
+      <label>Mots-clés
+        <input type="text" name="location.tags" value="{{config.tags}}" placeholder="ex. illégal, riche, temple, contrebande">
+      </label>
+    </div>
+
+    <div class="panel">
+      <h2>Propriétaire / responsable</h2>
+      <div class="location-owner-drop-zone">
+        {{#if proprietor}}
+        <div class="location-owner-card">
+          <img src="{{proprietor.img}}" alt="">
+          <div><strong>{{proprietor.name}}</strong><small>Actor PF1 lié</small></div>
+          <div class="npc-actions">
+            <button type="button" data-action="open-proprietor" title="Ouvrir"><i class="fas fa-arrow-up-right-from-square"></i></button>
+            <button type="button" data-action="remove-proprietor" title="Retirer le lien"><i class="fas fa-link-slash"></i></button>
+          </div>
+        </div>
+        {{else}}
+        <div class="empty-box">
+          {{#if proprietorMissing}}Le responsable précédemment lié est introuvable.{{else}}Aucun responsable lié.{{/if}}
+        </div>
+        {{/if}}
+      </div>
+      <button type="button" data-action="pick-proprietor"><i class="fas fa-user-plus"></i> Choisir un Actor</button>
+      <p class="small-note">Tu peux aussi glisser-déposer un Actor directement dans cette zone.</p>
+    </div>
+  </section>
+
+  <section class="location-grid two-columns">
+    <div class="panel">
+      <h2>Description publique</h2>
+      <textarea name="location.description" rows="9" placeholder="Ce que les PJ voient ou savent du lieu...">{{config.description}}</textarea>
+    </div>
+    <div class="panel">
+      <h2>Services, marchandises et fonctions</h2>
+      <textarea name="location.services" rows="9" placeholder="Boissons, chambres, sorts, marchandises, services de guilde...">{{config.services}}</textarea>
+    </div>
+    <div class="panel">
+      <h2>Rumeurs / accroches</h2>
+      <textarea name="location.rumors" rows="7" placeholder="Rumeurs, pistes d'aventure et informations que l'on peut apprendre ici...">{{config.rumors}}</textarea>
+    </div>
+    <div class="panel gm-secret-panel">
+      <h2><i class="fas fa-user-secret"></i> Secrets du MJ</h2>
+      <textarea name="location.secrets" rows="7" placeholder="Passages secrets, activités clandestines, véritable allégeance...">{{config.secrets}}</textarea>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Notes</h2>
+    <textarea name="location.notes" rows="5">{{config.notes}}</textarea>
+  </section>
+
+  <footer class="settlement-footer">
+    <button type="submit"><i class="fas fa-floppy-disk"></i> Enregistrer</button>
+  </footer>
+</form>

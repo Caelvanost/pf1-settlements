@@ -1,0 +1,1090 @@
+<div class="settlement-shell">
+  <header class="settlement-header">
+    <div class="title-group">
+      <i class="fas fa-city settlement-icon"></i>
+      <div>
+        <input class="settlement-name" type="text" name="name" value="{{name}}" {{#unless editable}}disabled{{/unless}}>
+        <div class="settlement-subtitle">
+          {{config.alignment}} — {{derived.typeLabel}} · population type : {{derived.populationRange}}
+          {{#if parentSettlement}} · <span class="district-badge"><i class="fas fa-location-dot"></i> Quartier de {{parentSettlement.name}}</span>{{/if}}
+        </div>
+      </div>
+    </div>
+    <div class="header-actions">
+      {{#if parentSettlement}}<button type="button" data-action="open-parent" data-id="{{parentSettlement.id}}"><i class="fas fa-arrow-up-right-from-square"></i> Ville parente</button>{{/if}}
+      <button type="submit"><i class="fas fa-floppy-disk"></i> Enregistrer / recalculer</button>
+      <button type="button" data-action="post-profile"><i class="fas fa-comment"></i> Chat</button>
+      <button type="button" data-action="copy-profile"><i class="fas fa-copy"></i> Copier</button>
+    </div>
+  </header>
+
+  <section class="pf1-overview-dashboard" aria-label="Vue d'ensemble de la communauté">
+    <div class="dashboard-stat"><span>Population</span><strong>{{dashboard.population}}</strong></div>
+    <div class="dashboard-stat"><span>Danger</span><strong>{{dashboard.danger}}</strong></div>
+    <div class="dashboard-stat"><span>Stock du marché</span><strong>{{dashboard.marketStock}}</strong></div>
+    <div class="dashboard-stat"><span>Rumeurs actives</span><strong>{{dashboard.activeRumors}}</strong></div>
+    <div class="dashboard-stat"><span>Événements</span><strong>{{dashboard.activeEvents}}</strong></div>
+    <div class="dashboard-stat"><span>Opinion</span><strong>{{dashboard.opinion}} {{dashboard.opinionScore}}</strong></div>
+    <div class="dashboard-stat"><span>Troubles</span><strong>{{dashboard.unrest}}</strong></div>
+    <div class="dashboard-stat"><span>Lois / taxes</span><strong>{{dashboard.activeLaws}} / {{dashboard.activeLevies}}</strong></div>
+  </section>
+
+  {{#if hasDashboardAlerts}}
+  <div class="pf1-dashboard-alerts" aria-label="Points à surveiller">
+    <strong><i class="fas fa-bell"></i> À surveiller</strong>
+    <div>
+      {{#each dashboard.alerts}}
+      <button type="button" class="dashboard-alert {{tone}}" data-jump-section="{{target}}"><i class="fas {{icon}}"></i> {{label}}</button>
+      {{/each}}
+    </div>
+  </div>
+  {{/if}}
+
+  <nav class="pf1-sheet-nav" aria-label="Navigation rapide dans la fiche">
+    <button type="button" data-jump-section="pf1-section-profile"><i class="fas fa-id-card"></i> Profil</button>
+    <button type="button" data-jump-section="pf1-section-districts"><i class="fas fa-map"></i> Quartiers</button>
+    <button type="button" data-jump-section="pf1-section-locations"><i class="fas fa-shop"></i> Lieux</button>
+    <button type="button" data-jump-section="pf1-section-factions"><i class="fas fa-people-group"></i> Factions</button>
+    <button type="button" data-jump-section="pf1-section-traits"><i class="fas fa-tags"></i> Traits</button>
+    <button type="button" data-jump-section="pf1-section-market"><i class="fas fa-coins"></i> Marché</button>
+    <button type="button" data-jump-section="pf1-section-urban"><i class="fas fa-street-view"></i> Vie urbaine</button>
+    <button type="button" data-jump-section="pf1-section-law"><i class="fas fa-shield-halved"></i> Garde</button>
+    <button type="button" data-jump-section="pf1-section-calendar"><i class="fas fa-calendar-days"></i> Calendrier</button>
+    <button type="button" data-jump-section="pf1-section-politics"><i class="fas fa-landmark"></i> Politique</button>
+    <button type="button" data-jump-section="pf1-section-legislation"><i class="fas fa-scale-balanced"></i> Lois</button>
+    <button type="button" data-jump-section="pf1-section-notes"><i class="fas fa-note-sticky"></i> Notes</button>
+  </nav>
+
+  {{#if derived.advantageOverflow}}
+    <div class="settlement-warning"><i class="fas fa-triangle-exclamation"></i> Cette communauté possède {{derived.chosenAdvantageCount}} avantages pour un maximum normal de {{derived.maxAdvantages}}.</div>
+  {{/if}}
+  {{#if parentMissing}}
+    <div class="settlement-warning"><i class="fas fa-triangle-exclamation"></i> La ville parente enregistrée n'existe plus. Choisis une nouvelle ville parente ou « Aucune ».</div>
+  {{/if}}
+
+  <section id="pf1-section-profile" class="settlement-grid top-grid pf1-scroll-target">
+    <div class="panel">
+      <h2>Identité</h2>
+      <div class="form-grid two">
+        <label>Type
+          <select name="settlement.type">
+            {{#each types}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+          </select>
+        </label>
+        <label>Alignement
+          <select name="settlement.alignment">
+            {{#each alignments}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{key}} — {{label}}</option>{{/each}}
+          </select>
+        </label>
+        <label>Gouvernement
+          <select name="settlement.government">
+            {{#each governments}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+          </select>
+        </label>
+        <label>Population
+          <input type="text" name="settlement.population" value="{{config.population}}" placeholder="ex. 2 340">
+        </label>
+        <label>Surnom(s)
+          <input type="text" name="settlement.nickname" value="{{config.nickname}}">
+        </label>
+        <label>Rôle dans la campagne
+          <input type="text" name="settlement.campaignRole" value="{{config.campaignRole}}">
+        </label>
+        <label>Ville parente
+          <select name="settlement.parentSettlementId" {{#if parentSelectDisabled}}disabled{{/if}}>
+            <option value="">Aucune — fiche de ville principale</option>
+            {{#each parentOptions}}<option value="{{id}}" {{#if selected}}selected{{/if}}>{{name}}</option>{{/each}}
+          </select>
+          {{#if parentSelectDisabled}}<span class="field-hint">Cette ville possède déjà des quartiers : détache-les avant d'en faire un quartier.</span>{{/if}}
+        </label>
+      </div>
+    </div>
+
+    <div class="panel modifiers-panel">
+      <h2>Modificateurs</h2>
+      <div class="modifier-grid">
+        <div><span>Corruption</span><strong>{{signed.corruption}}</strong></div>
+        <div><span>Criminalité</span><strong>{{signed.crime}}</strong></div>
+        <div><span>Économie</span><strong>{{signed.economy}}</strong></div>
+        <div><span>Loi</span><strong>{{signed.law}}</strong></div>
+        <div><span>Folklore</span><strong>{{signed.lore}}</strong></div>
+        <div><span>Société</span><strong>{{signed.society}}</strong></div>
+      </div>
+      <div class="danger-box"><span>Danger</span><strong>{{formatted.danger}}</strong></div>
+    </div>
+  </section>
+
+  <section id="pf1-section-districts" class="panel district-panel pf1-scroll-target">
+    <div class="panel-title-row">
+      <div>
+        <h2>Quartiers</h2>
+        <p class="small-note">Chaque quartier est une fiche de communauté complète avec ses propres caractéristiques.</p>
+      </div>
+      {{#if canCreateDistrict}}<button type="button" data-action="create-district"><i class="fas fa-plus"></i> Créer un quartier</button>{{/if}}
+    </div>
+    {{#if isDistrict}}
+      <div class="district-parent-card">
+        {{#if parentSettlement}}
+          <span><i class="fas fa-location-dot"></i> Cette fiche est un quartier de <strong>{{parentSettlement.name}}</strong>.</span>
+          <button type="button" data-action="open-parent" data-id="{{parentSettlement.id}}"><i class="fas fa-arrow-up-right-from-square"></i> Ouvrir</button>
+        {{else}}
+          <span>Cette fiche est enregistrée comme quartier, mais sa ville parente est introuvable.</span>
+        {{/if}}
+      </div>
+    {{else}}
+      {{#if hasDistricts}}
+      <ol class="district-cards">
+        {{#each districts}}
+        <li>
+          <div><strong><i class="fas fa-map-location-dot"></i> {{name}}</strong><small>{{type}} · Population {{population}}</small></div>
+          <div class="district-actions">
+            <button type="button" data-action="open-district" data-id="{{id}}"><i class="fas fa-pen-to-square"></i> Ouvrir</button>
+            <button type="button" data-action="detach-district" data-id="{{id}}" title="Détacher sans supprimer la fiche"><i class="fas fa-link-slash"></i></button>
+          </div>
+        </li>
+        {{/each}}
+      </ol>
+      {{else}}
+      <div class="empty-box">Aucun quartier rattaché à cette ville.</div>
+      {{/if}}
+    {{/if}}
+  </section>
+
+  <section id="pf1-section-locations" class="panel location-list-panel pf1-scroll-target">
+    <div class="panel-title-row">
+      <div>
+        <h2>Lieux et établissements <small>{{locationCount}}</small></h2>
+        <p class="small-note">Tavernes, boutiques, temples, guildes, ports et autres lieux sont maintenant de vraies fiches liées à cette ville ou à ce quartier.</p>
+      </div>
+      <button type="button" data-action="create-location"><i class="fas fa-plus"></i> Créer un lieu</button>
+    </div>
+    {{#if hasLocations}}
+    <ol class="location-cards">
+      {{#each locations}}
+      <li>
+        <div class="location-summary">
+          <strong><i class="fas fa-shop"></i> {{name}}</strong>
+          <small>{{type}}{{#if districtName}} · {{districtName}}{{/if}}{{#if address}} · {{address}}{{/if}}</small>
+        </div>
+        <button type="button" data-action="open-location" data-id="{{id}}"><i class="fas fa-pen-to-square"></i> Ouvrir</button>
+      </li>
+      {{/each}}
+    </ol>
+    {{else}}
+    <div class="empty-box">Aucun lieu structuré pour le moment.</div>
+    {{/if}}
+  </section>
+
+  <section id="pf1-section-factions" class="panel faction-list-panel pf1-scroll-target">
+    <div class="panel-title-row">
+      <div>
+        <h2>Factions et organisations <small>{{factionCount}}</small></h2>
+        <p class="small-note">Guildes, cultes, autorités, familles, bandes et réseaux ayant une influence dans cette {{#if isDistrict}}zone{{else}}ville ou ses quartiers{{/if}}.</p>
+      </div>
+      <div class="faction-panel-actions">
+        <button type="button" data-action="open-faction-network"><i class="fas fa-diagram-project"></i> Réseau</button>
+        <button type="button" data-action="link-faction"><i class="fas fa-link"></i> Lier existante</button>
+        <button type="button" data-action="create-faction"><i class="fas fa-plus"></i> Créer une faction</button>
+      </div>
+    </div>
+    {{#if hasFactionsStructured}}
+    <ol class="faction-cards">
+      {{#each factionsStructured}}
+      <li>
+        <div class="faction-summary">
+          <strong><i class="fas fa-people-group"></i> {{name}}</strong>
+          <small>{{type}}{{#if leaderName}} · Chef : {{leaderName}}{{/if}}{{#if influenceSummary}} · {{influenceSummary}}{{/if}}</small>
+        </div>
+        <div class="faction-row-actions">
+          <button type="button" data-action="open-faction" data-id="{{id}}"><i class="fas fa-pen-to-square"></i> Ouvrir</button>
+          <button type="button" data-action="unlink-faction" data-id="{{id}}" title="Retirer l'influence de cette zone sans supprimer la faction"><i class="fas fa-link-slash"></i></button>
+        </div>
+      </li>
+      {{/each}}
+    </ol>
+    {{else}}<div class="empty-box">Aucune faction structurée liée à cette zone.</div>{{/if}}
+  </section>
+
+
+
+  <section id="pf1-section-traits" class="panel pf1-scroll-target">
+    <h2>Avantages <small>{{derived.chosenAdvantageCount}} / {{derived.maxAdvantages}}</small></h2>
+    <div class="traits-grid">
+      {{#each advantages}}
+      <label class="trait-card">
+        <span class="trait-title"><input type="checkbox" name="settlement.advantages.{{key}}" {{#if checked}}checked{{/if}}> {{label}}</span>
+        <span class="trait-description">{{description}}</span>
+        <small class="trait-source"><i class="fas fa-book"></i> Source : {{source}}</small>
+      </label>
+      {{/each}}
+    </div>
+    <div class="form-grid two conditional-details">
+      <label>Religion officielle / lieu saint
+        <input type="text" name="settlement.officialReligion" value="{{config.officialReligion}}" placeholder="Optionnel">
+      </label>
+      <label>Races visées par Raciste
+        <input type="text" name="settlement.racistTargets" value="{{config.racistTargets}}" placeholder="Optionnel">
+      </label>
+    </div>
+
+    <div class="custom-drawbacks-header custom-advantages-header">
+      <div>
+        <h3>Avantages personnalisés</h3>
+        <p class="small-note">Pour les campagnes et suppléments qui introduisent une qualité de communauté absente de la liste de base. Les avantages actifs comptent dans la limite liée à la taille de la communauté.</p>
+      </div>
+      <button type="button" data-action="add-custom-advantage"><i class="fas fa-plus"></i> Ajouter</button>
+    </div>
+
+    {{#if hasCustomAdvantages}}
+    <div class="custom-drawback-list custom-advantage-list">
+      {{#each customAdvantages}}
+      <article class="custom-drawback-card custom-advantage-card {{#unless active}}inactive{{/unless}}">
+        <div class="custom-drawback-title-row">
+          <label>Nom
+            <input type="text" name="settlement.customAdvantages.{{id}}.label" value="{{label}}" placeholder="Nom de l'avantage">
+          </label>
+          <div class="custom-drawback-actions">
+            <button type="button" data-action="toggle-custom-advantage" data-id="{{id}}" title="Activer ou désactiver cet avantage">
+              <i class="fas {{#if active}}fa-toggle-on{{else}}fa-toggle-off{{/if}}"></i> {{#if active}}Actif{{else}}Inactif{{/if}}
+            </button>
+            <button type="button" data-action="save-custom-advantage-library" data-id="{{id}}" title="Enregistrer dans la bibliothèque"><i class="fas fa-bookmark"></i></button>
+            <button type="button" data-action="remove-custom-advantage" data-id="{{id}}" title="Supprimer"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+        <div class="custom-drawback-mod-grid">
+          <label>Corruption<input type="number" step="1" name="settlement.customAdvantages.{{id}}.corruption" value="{{corruption}}"></label>
+          <label>Criminalité<input type="number" step="1" name="settlement.customAdvantages.{{id}}.crime" value="{{crime}}"></label>
+          <label>Économie<input type="number" step="1" name="settlement.customAdvantages.{{id}}.economy" value="{{economy}}"></label>
+          <label>Loi<input type="number" step="1" name="settlement.customAdvantages.{{id}}.law" value="{{law}}"></label>
+          <label>Folklore<input type="number" step="1" name="settlement.customAdvantages.{{id}}.lore" value="{{lore}}"></label>
+          <label>Société<input type="number" step="1" name="settlement.customAdvantages.{{id}}.society" value="{{society}}"></label>
+          <label>Danger<input type="number" step="1" name="settlement.customAdvantages.{{id}}.danger" value="{{danger}}"></label>
+          <label>Valeur de base (%)<input type="number" step="1" name="settlement.customAdvantages.{{id}}.baseValuePct" value="{{baseValuePct}}"></label>
+          <label>Limite d'achat (%)<input type="number" step="1" name="settlement.customAdvantages.{{id}}.purchaseLimitPct" value="{{purchaseLimitPct}}"></label>
+          <label>Incantation<input type="number" step="1" name="settlement.customAdvantages.{{id}}.spellcasting" value="{{spellcasting}}"></label>
+        </div>
+        <div class="form-grid two">
+          <label>Source
+            <input type="text" name="settlement.customAdvantages.{{id}}.source" value="{{source}}" placeholder="Livre, campagne, page...">
+          </label>
+          <label>Type de source
+            <select name="settlement.customAdvantages.{{id}}.sourceType">
+              <option value="gmg" {{#if sourceIsGmg}}selected{{/if}}>Guide du Maître</option>
+              <option value="supplement" {{#if sourceIsSupplement}}selected{{/if}}>Supplément / Adventure Path</option>
+              <option value="homebrew" {{#if sourceIsHomebrew}}selected{{/if}}>Campagne maison</option>
+              <option value="other" {{#if sourceIsOther}}selected{{/if}}>Autre source</option>
+            </select>
+          </label>
+        </div>
+        <label>Notes
+          <textarea name="settlement.customAdvantages.{{id}}.notes" rows="2" placeholder="Durée, circonstances, précisions...">{{notes}}</textarea>
+        </label>
+      </article>
+      {{/each}}
+    </div>
+    {{else}}
+    <p class="empty-box">Aucun avantage personnalisé.</p>
+    {{/if}}
+  </section>
+
+  <section class="panel">
+    <h2>Inconvénients</h2>
+    <div class="traits-grid drawbacks">
+      {{#each drawbacks}}
+      <label class="trait-card">
+        <span class="trait-title"><input type="checkbox" name="settlement.drawbacks.{{key}}" {{#if checked}}checked{{/if}}> {{label}}</span>
+        <span class="trait-description">{{description}}</span>
+        <small class="trait-source"><i class="fas fa-book"></i> Source : {{source}}</small>
+      </label>
+      {{/each}}
+    </div>
+    <div class="form-grid two conditional-details">
+      <label>Modificateur réduit par Maudite
+        <select name="settlement.cursedModifier">
+          {{#each cursedModifiers}}<option value="{{key}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+        </select>
+      </label>
+      <label>Maladie de l'épidémie
+        <input type="text" name="settlement.plagueDisease" value="{{config.plagueDisease}}" placeholder="Optionnel">
+      </label>
+    </div>
+
+    <div class="custom-drawbacks-header">
+      <div>
+        <h3>Inconvénients personnalisés</h3>
+        <p class="small-note">Pour les campagnes et suppléments qui introduisent un handicap de communauté absent de la liste de base. Les effets actifs sont intégrés au calcul de la fiche.</p>
+      </div>
+      <button type="button" data-action="add-custom-drawback"><i class="fas fa-plus"></i> Ajouter</button>
+    </div>
+
+    {{#if hasCustomDrawbacks}}
+    <div class="custom-drawback-list">
+      {{#each customDrawbacks}}
+      <article class="custom-drawback-card {{#unless active}}inactive{{/unless}}">
+        <div class="custom-drawback-title-row">
+          <label>Nom
+            <input type="text" name="settlement.customDrawbacks.{{id}}.label" value="{{label}}" placeholder="Nom de l'inconvénient">
+          </label>
+          <div class="custom-drawback-actions">
+            <button type="button" data-action="toggle-custom-drawback" data-id="{{id}}" title="Activer ou désactiver cet inconvénient">
+              <i class="fas {{#if active}}fa-toggle-on{{else}}fa-toggle-off{{/if}}"></i> {{#if active}}Actif{{else}}Inactif{{/if}}
+            </button>
+            <button type="button" data-action="save-custom-drawback-library" data-id="{{id}}" title="Enregistrer dans la bibliothèque"><i class="fas fa-bookmark"></i></button>
+            <button type="button" data-action="remove-custom-drawback" data-id="{{id}}" title="Supprimer"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>
+        <div class="custom-drawback-mod-grid">
+          <label>Corruption<input type="number" step="1" name="settlement.customDrawbacks.{{id}}.corruption" value="{{corruption}}"></label>
+          <label>Criminalité<input type="number" step="1" name="settlement.customDrawbacks.{{id}}.crime" value="{{crime}}"></label>
+          <label>Économie<input type="number" step="1" name="settlement.customDrawbacks.{{id}}.economy" value="{{economy}}"></label>
+          <label>Loi<input type="number" step="1" name="settlement.customDrawbacks.{{id}}.law" value="{{law}}"></label>
+          <label>Folklore<input type="number" step="1" name="settlement.customDrawbacks.{{id}}.lore" value="{{lore}}"></label>
+          <label>Société<input type="number" step="1" name="settlement.customDrawbacks.{{id}}.society" value="{{society}}"></label>
+          <label>Danger<input type="number" step="1" name="settlement.customDrawbacks.{{id}}.danger" value="{{danger}}"></label>
+          <label>Valeur de base (%)<input type="number" step="1" name="settlement.customDrawbacks.{{id}}.baseValuePct" value="{{baseValuePct}}"></label>
+          <label>Limite d'achat (%)<input type="number" step="1" name="settlement.customDrawbacks.{{id}}.purchaseLimitPct" value="{{purchaseLimitPct}}"></label>
+          <label>Incantation<input type="number" step="1" name="settlement.customDrawbacks.{{id}}.spellcasting" value="{{spellcasting}}"></label>
+        </div>
+        <div class="form-grid two">
+          <label>Source
+            <input type="text" name="settlement.customDrawbacks.{{id}}.source" value="{{source}}" placeholder="Livre, campagne, page...">
+          </label>
+          <label>Type de source
+            <select name="settlement.customDrawbacks.{{id}}.sourceType">
+              <option value="gmg" {{#if sourceIsGmg}}selected{{/if}}>Guide du Maître</option>
+              <option value="supplement" {{#if sourceIsSupplement}}selected{{/if}}>Supplément / Adventure Path</option>
+              <option value="homebrew" {{#if sourceIsHomebrew}}selected{{/if}}>Campagne maison</option>
+              <option value="other" {{#if sourceIsOther}}selected{{/if}}>Autre source</option>
+            </select>
+          </label>
+        </div>
+        <label>Notes
+          <textarea name="settlement.customDrawbacks.{{id}}.notes" rows="2" placeholder="Durée, circonstances, précisions...">{{notes}}</textarea>
+        </label>
+      </article>
+      {{/each}}
+    </div>
+    {{else}}
+    <p class="empty-box">Aucun inconvénient personnalisé.</p>
+    {{/if}}
+  </section>
+
+  <section id="pf1-section-market" class="settlement-grid market-grid pf1-scroll-target">
+    <div class="panel">
+      <h2>Démographie</h2>
+      <label>Répartition de la population
+        <textarea name="settlement.populationBreakdown" rows="4" placeholder="ex. 1 800 humains, 300 nains, 240 halfelins...">{{config.populationBreakdown}}</textarea>
+      </label>
+      <label>PNJ importants — notes libres
+        <textarea name="settlement.importantNpcs" rows="4" placeholder="Informations supplémentaires sur les PNJ, PNJ sans fiche Foundry...">{{config.importantNpcs}}</textarea>
+      </label>
+
+      <div class="linked-npc-header">
+        <div><strong>PNJ liés à des fiches PF1</strong><span>Cliquer pour ouvrir directement l'Actor.</span></div>
+        <button type="button" data-action="add-npc"><i class="fas fa-user-plus"></i> Ajouter</button>
+      </div>
+      <div class="npc-drop-zone">
+        {{#if hasLinkedNpcs}}
+        <ol class="linked-npc-list">
+          {{#each linkedNpcs}}
+          <li class="{{#if missing}}missing{{/if}}">
+            <img src="{{img}}" alt="">
+            <div class="npc-summary">
+              <strong>{{name}}</strong>
+              <small>{{#if role}}{{role}}{{else}}Rôle non renseigné{{/if}}{{#if missing}} · fiche introuvable{{/if}}</small>
+            </div>
+            <div class="npc-actions">
+              {{#unless missing}}<button type="button" data-action="open-npc" data-uuid="{{uuid}}" title="Ouvrir la fiche"><i class="fas fa-arrow-up-right-from-square"></i></button>{{/unless}}
+              <button type="button" data-action="edit-npc-role" data-uuid="{{uuid}}" title="Modifier le rôle"><i class="fas fa-pen"></i></button>
+              <button type="button" data-action="remove-npc" data-uuid="{{uuid}}" title="Retirer le lien"><i class="fas fa-link-slash"></i></button>
+            </div>
+          </li>
+          {{/each}}
+        </ol>
+        {{else}}
+        <div class="empty-box"><i class="fas fa-user"></i> Aucun PNJ lié. Clique sur « Ajouter » ou glisse-dépose une fiche d'Actor ici.</div>
+        {{/if}}
+      </div>
+    </div>
+
+    <div class="panel market-panel">
+      <div class="panel-title-row">
+        <div>
+          <h2>Place du marché</h2>
+          <p class="small-note">Semaine de marché <strong>{{marketWeek}}</strong> · dernière génération : {{marketGeneratedAt}}</p>
+        </div>
+        <button type="button" data-action="market-next-week" title="Passe à la semaine suivante, retire les objets vendus et relance les quantités"><i class="fas fa-calendar-plus"></i> Nouvelle semaine</button>
+      </div>
+      <div class="market-stats">
+        <div><span>Valeur de base</span><strong>{{formatted.baseValue}} po</strong></div>
+        <div><span>Limite d'achat</span><strong>{{formatted.purchaseLimit}} po</strong></div>
+        <div><span>Incantation</span><strong>Niveau {{derived.market.spellcasting}}</strong></div>
+      </div>
+
+      <h3>Objets dépassant la valeur de base</h3>
+      <table class="magic-table market-slot-table">
+        <thead><tr><th>Puissance</th><th>Formule</th><th>Emplacements</th><th>Stock</th><th>Restants</th></tr></thead>
+        <tbody>
+          {{#each marketSlots}}
+          <tr><td>{{label}}</td><td>{{formula}}</td><td>{{totalLabel}}</td><td>{{used}}</td><td>{{remainingLabel}}</td></tr>
+          {{/each}}
+        </tbody>
+      </table>
+      {{#if derived.market.poverty}}<p class="small-note">Pauvreté : les quantités obtenues sont réduites de moitié.</p>{{/if}}
+      <div class="tool-buttons market-main-tools">
+        <button type="button" data-action="market-roll"><i class="fas fa-dice"></i> Relancer les quantités</button>
+        <button type="button" data-action="availability-check"><i class="fas fa-magnifying-glass"></i> Tester un objet à 75 %</button>
+        <button type="button" data-action="market-add-item"><i class="fas fa-bag-shopping"></i> Ajouter un objet PF1</button>
+      </div>
+
+      <div class="market-stock-header">
+        <div><strong>Stock structuré</strong><span>{{marketStockCount}} objet(s) actuellement disponibles</span></div>
+      </div>
+      <div class="market-drop-zone">
+        {{#if hasMarketStock}}
+        <ol class="market-stock-list">
+          {{#each marketStock}}
+          <li class="{{soldClass}} {{#if missing}}missing{{/if}}">
+            <img src="{{img}}" alt="">
+            <div class="market-stock-summary">
+              <strong>{{name}}</strong>
+              <small>{{tierLabel}} · {{priceLabel}} po · ×{{quantity}} · {{merchantName}}</small>
+              {{#if notes}}<small class="gm-note">{{notes}}</small>{{/if}}
+            </div>
+            <span class="market-status {{#if sold}}sold{{else}}available{{/if}}">{{statusLabel}}</span>
+            <div class="market-stock-actions">
+              {{#unless missing}}<button type="button" data-action="market-open-item" data-uuid="{{uuid}}" title="Ouvrir l'objet PF1"><i class="fas fa-arrow-up-right-from-square"></i></button>{{/unless}}
+              <button type="button" data-action="market-edit-item" data-id="{{id}}" title="Modifier"><i class="fas fa-pen"></i></button>
+              <button type="button" data-action="market-toggle-sold" data-id="{{id}}" title="Marquer vendu / remettre en vente"><i class="fas fa-coins"></i></button>
+              <button type="button" data-action="market-remove-item" data-id="{{id}}" title="Retirer du stock"><i class="fas fa-trash"></i></button>
+            </div>
+          </li>
+          {{/each}}
+        </ol>
+        {{else}}
+        <div class="empty-box market-empty"><i class="fas fa-bag-shopping"></i> Aucun objet structuré. Glisse-dépose ici un Item PF1 depuis le monde ou un compendium, ou utilise « Ajouter un objet PF1 ».</div>
+        {{/if}}
+      </div>
+
+      <details class="market-check-history" {{#if hasMarketChecks}}open{{/if}}>
+        <summary>Tests de disponibilité — semaine {{marketWeek}}</summary>
+        {{#if hasMarketChecks}}
+        <ol>
+          {{#each marketChecks}}
+          <li><span><strong>{{item}}</strong> · {{priceLabel}} po</span><span class="market-check-result {{resultClass}}">{{resultLabel}} (d100 : {{rollTotal}})</span></li>
+          {{/each}}
+        </ol>
+        {{else}}<p class="small-note">Aucun test effectué cette semaine.</p>{{/if}}
+      </details>
+    </div>
+  </section>
+
+  <section id="pf1-section-urban" class="panel urban-life-panel pf1-scroll-target">
+    <div class="panel-title-row urban-title-row">
+      <div>
+        <h2>Vie urbaine : rumeurs, événements et rencontres</h2>
+        <p class="small-note">Le Danger de la communauté ({{urbanDangerLabel}}) modifie les jets de rencontres urbaines du Guide du Maître.</p>
+      </div>
+      <div class="urban-danger-badge"><span>Danger</span><strong>{{urbanDangerLabel}}</strong></div>
+    </div>
+
+    <div class="urban-grid">
+      <div class="urban-column encounter-column">
+        <div class="urban-column-header">
+          <div><strong>Rencontres urbaines</strong><span>Tables 7-41 à 7-48</span></div>
+          {{#if isGM}}<button type="button" data-action="urban-roll-encounter"><i class="fas fa-dice-d20"></i> Tirer</button>{{/if}}
+        </div>
+        <p class="small-note">Le module lance 1d100, ajoute le Danger, puis limite le résultat entre 1 et 100. Les rencontres sont classées du FP le plus faible au plus élevé.</p>
+        <div class="urban-table-tags">
+          {{#each urbanEncounterTables}}<span title="{{source}}">{{label}}</span>{{/each}}
+        </div>
+        <details class="urban-history" {{#if hasUrbanEncounterHistory}}open{{/if}}>
+          <summary>Historique des rencontres</summary>
+          {{#if hasUrbanEncounterHistory}}
+          <ol>
+            {{#each urbanEncounterHistory}}
+            <li>
+              <div><strong>{{tableLabel}}</strong> — {{encounter}} <small>FP {{cr}} · {{source}}</small></div>
+              <span>d100 {{raw}} {{dangerLabel}} = <strong>{{adjusted}}</strong></span>
+            </li>
+            {{/each}}
+          </ol>
+          {{else}}<p class="small-note">Aucune rencontre tirée.</p>{{/if}}
+          {{#if isGM}}{{#if hasUrbanEncounterHistory}}<button type="button" data-action="urban-clear-history" class="compact"><i class="fas fa-broom"></i> Effacer l'historique</button>{{/if}}{{/if}}
+        </details>
+      </div>
+
+      <div class="urban-column rumor-column">
+        <div class="urban-column-header">
+          <div><strong>Rumeurs structurées</strong><span>{{urbanRumorCount}} entrée(s)</span></div>
+          {{#if isGM}}<button type="button" data-action="urban-add-rumor"><i class="fas fa-comment-medical"></i> Ajouter</button>{{/if}}
+        </div>
+        {{#if hasUrbanRumors}}
+        <ol class="urban-card-list rumor-list">
+          {{#each urbanRumors}}
+          <li class="{{stateClass}}">
+            <div class="urban-card-main">
+              <p>{{text}}</p>
+              <div class="urban-meta">
+                <span class="urban-state {{stateClass}}">{{stateLabel}}</span>
+                <span>{{visibilityLabel}}</span>
+                {{#if locationName}}<span><i class="fas fa-location-dot"></i> {{locationName}}</span>{{/if}}
+                {{#if factionName}}<span><i class="fas fa-people-group"></i> {{factionName}}</span>{{/if}}
+                {{#if @root.isGM}}<span class="rumor-truth">{{truthLabel}}</span>{{/if}}
+              </div>
+            </div>
+            <div class="urban-card-actions">
+              <button type="button" data-action="urban-post-rumor" data-id="{{id}}" title="Envoyer la rumeur au chat"><i class="fas fa-comment"></i></button>
+              {{#if @root.isGM}}
+              <button type="button" data-action="urban-toggle-rumor" data-id="{{id}}" title="Activer / classer"><i class="fas fa-box-archive"></i></button>
+              <button type="button" data-action="urban-edit-rumor" data-id="{{id}}" title="Modifier"><i class="fas fa-pen"></i></button>
+              <button type="button" data-action="urban-remove-rumor" data-id="{{id}}" title="Supprimer"><i class="fas fa-trash"></i></button>
+              {{/if}}
+            </div>
+          </li>
+          {{/each}}
+        </ol>
+        {{else}}<div class="empty-box"><i class="fas fa-comments"></i> Aucune rumeur structurée. L'ancien champ « Idées d'aventure / rumeurs » reste disponible plus bas.</div>{{/if}}
+      </div>
+    </div>
+
+    <div class="urban-events-section">
+      <div class="urban-column-header">
+        <div><strong>Événements urbains</strong><span>Suivi de la situation actuelle de la ville</span></div>
+        {{#if isGM}}<div class="urban-header-actions"><button type="button" data-action="urban-inspire-event" title="Inspiration tirée des exemples du chapitre Les villes ; ce n'est pas une table officielle"><i class="fas fa-wand-magic-sparkles"></i> Inspiration</button><button type="button" data-action="urban-add-event"><i class="fas fa-calendar-plus"></i> Ajouter</button></div>{{/if}}
+      </div>
+      <p class="small-note">« Inspiration » utilise les exemples du Guide (vol à la tire, émeute, duel, incendie, etc.) comme aide de préparation ; ce bouton n'est pas une table de règle officielle.</p>
+      {{#if hasUrbanEvents}}
+      <ol class="urban-card-list event-list">
+        {{#each urbanEvents}}
+        <li class="{{statusClass}} {{severityClass}}">
+          <div class="urban-event-marker"><span>{{severity}}</span></div>
+          <div class="urban-card-main">
+            <strong>{{title}}</strong>
+            {{#if description}}<p>{{description}}</p>{{/if}}
+            <div class="urban-meta">
+              <span class="urban-event-status {{statusClass}}">{{statusLabel}}</span>
+              <span>{{severityLabel}}</span>
+              <span>{{visibilityLabel}}</span>
+              {{#if locationName}}<span><i class="fas fa-location-dot"></i> {{locationName}}</span>{{/if}}
+              {{#if factionName}}<span><i class="fas fa-people-group"></i> {{factionName}}</span>{{/if}}
+            </div>
+          </div>
+          <div class="urban-card-actions">
+            <button type="button" data-action="urban-post-event" data-id="{{id}}" title="Envoyer au chat"><i class="fas fa-comment"></i></button>
+            {{#if @root.isGM}}
+            <button type="button" data-action="urban-cycle-event" data-id="{{id}}" title="Faire progresser l'état"><i class="fas fa-forward-step"></i></button>
+            <button type="button" data-action="urban-edit-event" data-id="{{id}}" title="Modifier"><i class="fas fa-pen"></i></button>
+            <button type="button" data-action="urban-remove-event" data-id="{{id}}" title="Supprimer"><i class="fas fa-trash"></i></button>
+            {{/if}}
+          </div>
+        </li>
+        {{/each}}
+      </ol>
+      {{else}}<div class="empty-box"><i class="fas fa-calendar-days"></i> Aucun événement urbain suivi.</div>{{/if}}
+    </div>
+  </section>
+
+  <section id="pf1-section-law" class="panel law-panel pf1-scroll-target">
+    <div class="panel-title-row law-title-row">
+      <div>
+        <h2>Garde, loi et criminalité</h2>
+        <p class="small-note">Règles de communauté et profils de milice du Guide du Maître, avec outils de suivi Foundry pour les alertes et affaires criminelles.</p>
+      </div>
+      <div class="law-alert-badge alert-{{lawAlertLevel}}"><span>Alerte</span><strong>{{lawAlertLevel}} — {{lawAlertLabel}}</strong></div>
+    </div>
+
+    <div class="law-modifier-strip">
+      <div><span>Loi</span><strong>{{lawModifierLabel}}</strong><small>Vigilance et organisation de la garde</small></div>
+      <div><span>Criminalité</span><strong>{{crimeModifierLabel}}</strong><small>Niveau d'anarchie et activité criminelle</small></div>
+      <div><span>Corruption</span><strong>{{corruptionModifierLabel}}</strong><small>Honnêteté, pots-de-vin et dénonciation</small></div>
+      <div class="law-alert-card">
+        <span>Niveau d'alerte du module</span>
+        <strong>{{lawAlertLabel}}</strong>
+        <small>{{lawAlertDescription}}</small>
+        {{#if isGM}}<button type="button" data-action="law-set-alert"><i class="fas fa-bell"></i> Modifier</button>{{/if}}
+      </div>
+    </div>
+
+    <div class="law-rules-grid">
+      <div class="law-rule-card">
+        <strong><i class="fas fa-scale-balanced"></i> Loi {{lawModifierLabel}}</strong>
+        <p>S'applique aux tests d'Intimidation pour obliger un adversaire à devenir amical, aux tests de Diplomatie contre les fonctionnaires du gouvernement et aux tests pour appeler la garde.</p>
+      </div>
+      <div class="law-rule-card">
+        <strong><i class="fas fa-hand-holding-dollar"></i> Corruption {{corruptionModifierLabel}}</strong>
+        <p>S'applique aux tests de Bluff contre les fonctionnaires ou les gardes, ainsi qu'aux tests de Discrétion en extérieur.</p>
+      </div>
+      <div class="law-rule-card">
+        <strong><i class="fas fa-mask"></i> Criminalité {{crimeModifierLabel}}</strong>
+        <p>S'applique aux tests de Psychologie pour éviter de se faire Bluffer et aux tests d'Escamotage des pickpockets.</p>
+      </div>
+    </div>
+
+    <div class="law-primary-actions">
+      <button type="button" data-action="call-guard"><i class="fas fa-bullhorn"></i> Appeler la garde (DD 5)</button>
+      {{#if isGM}}<button type="button" data-action="law-dispatch"><i class="fas fa-shield-halved"></i> Déployer une formation</button>{{/if}}
+    </div>
+    <p class="small-note">Appeler la garde suit l'encart « À la garde ! » : Diplomatie + Loi, DD 5, arrivée en 1d6 minutes avec réduction du délai par tranche de 5 points au-dessus du DD.</p>
+
+    <div class="law-grid">
+      <div class="law-column">
+        <div class="urban-column-header">
+          <div><strong>Autorités liées</strong><span>Actors PF1 existants</span></div>
+        </div>
+        <ol class="law-authority-list">
+          {{#each lawAuthorityActors}}
+          <li class="{{#if missing}}missing{{/if}}">
+            <img src="{{img}}" alt="">
+            <div class="law-authority-summary"><strong>{{label}}</strong><small>{{name}}</small></div>
+            <div class="law-row-actions">
+              {{#if assigned}}{{#unless missing}}<button type="button" data-action="law-open-actor" data-uuid="{{uuid}}" title="Ouvrir l'Actor"><i class="fas fa-arrow-up-right-from-square"></i></button>{{/unless}}{{/if}}
+              {{#if @root.isGM}}<button type="button" data-action="law-set-actor" data-role="{{role}}" title="Assigner / remplacer"><i class="fas fa-user-pen"></i></button>{{/if}}
+              {{#if @root.isGM}}{{#if assigned}}<button type="button" data-action="law-clear-actor" data-role="{{role}}" title="Retirer le lien"><i class="fas fa-link-slash"></i></button>{{/if}}{{/if}}
+            </div>
+          </li>
+          {{/each}}
+        </ol>
+      </div>
+
+      <div class="law-column">
+        <div class="urban-column-header">
+          <div><strong>Formations de milice</strong><span>Compositions du Guide du Maître</span></div>
+          {{#if isGM}}<button type="button" data-action="law-dispatch"><i class="fas fa-person-military-pointing"></i> Déployer</button>{{/if}}
+        </div>
+        <table class="magic-table guard-formation-table">
+          <thead><tr><th>Formation</th><th>Composition</th><th>FP</th></tr></thead>
+          <tbody>
+            {{#each guardFormations}}<tr title="{{source}}"><td>{{label}}</td><td>{{summary}}</td><td>{{cr}}</td></tr>{{/each}}
+          </tbody>
+        </table>
+        <p class="small-note">Le Guide précise que le MJ choisit entre garde seul, groupe, escouade ou patrouille selon la dangerosité de la ville ou du quartier. La sécurité d'une petite prison est également indiquée.</p>
+
+        {{#if isGM}}
+        <details class="law-patrol-history" {{#if hasLawPatrolHistory}}open{{/if}}>
+          <summary>Historique des déploiements</summary>
+          {{#if hasLawPatrolHistory}}
+          <ol>
+            {{#each lawPatrolHistory}}
+            <li><div><strong>{{formationLabel}}</strong> — {{summary}} <small>{{locationName}}{{#if reason}} · {{reason}}{{/if}}</small></div><span>{{timeLabel}}</span></li>
+            {{/each}}
+          </ol>
+          <button type="button" data-action="law-clear-patrol-history" class="compact"><i class="fas fa-broom"></i> Effacer</button>
+          {{else}}<p class="small-note">Aucun déploiement enregistré.</p>{{/if}}
+        </details>
+        {{/if}}
+      </div>
+    </div>
+
+    {{#if isGM}}
+    <div class="law-crime-section">
+      <div class="urban-column-header">
+        <div><strong>Registre des affaires</strong><span>{{lawWantedCount}} personne(s) activement recherchée(s)</span></div>
+        <button type="button" data-action="law-add-crime"><i class="fas fa-file-circle-plus"></i> Ajouter une affaire</button>
+      </div>
+      <p class="small-note">Le registre (gravité, prime, amende, peine, état) est une aide de campagne du module : le Guide du Maître ne fixe pas de barème universel des crimes et sentences.</p>
+      {{#if hasLawCrimes}}
+      <ol class="law-crime-list">
+        {{#each lawCrimes}}
+        <li class="{{statusClass}} {{severityClass}}">
+          <img src="{{suspectImg}}" alt="">
+          <div class="law-crime-main">
+            <strong>{{offense}}</strong>
+            <p>Suspect : <b>{{suspectDisplay}}</b>{{#if locationName}} · {{locationName}}{{/if}}{{#if factionName}} · {{factionName}}{{/if}}</p>
+            <div class="urban-meta">
+              <span class="crime-status {{statusClass}}">{{statusLabel}}</span>
+              <span>Gravité {{severity}} — {{severityLabel}}</span>
+              {{#if bounty}}<span>Prime {{bountyLabel}} po</span>{{/if}}
+              {{#if fine}}<span>Amende {{fineLabel}} po</span>{{/if}}
+              {{#if sentence}}<span>{{sentence}}</span>{{/if}}
+            </div>
+            {{#if evidence}}<small class="law-evidence"><b>Preuves :</b> {{evidence}}</small>{{/if}}
+            {{#if notes}}<small class="gm-note"><b>Notes MJ :</b> {{notes}}</small>{{/if}}
+          </div>
+          <div class="law-row-actions">
+            <button type="button" data-action="law-post-crime" data-id="{{id}}" title="Publier un avis sans les notes/preuves"><i class="fas fa-comment"></i></button>
+            <button type="button" data-action="law-cycle-crime" data-id="{{id}}" title="Faire progresser l'état"><i class="fas fa-forward-step"></i></button>
+            <button type="button" data-action="law-edit-crime" data-id="{{id}}" title="Modifier"><i class="fas fa-pen"></i></button>
+            <button type="button" data-action="law-remove-crime" data-id="{{id}}" title="Supprimer"><i class="fas fa-trash"></i></button>
+          </div>
+        </li>
+        {{/each}}
+      </ol>
+      {{else}}<div class="empty-box"><i class="fas fa-scale-balanced"></i> Aucune affaire enregistrée.</div>{{/if}}
+    </div>
+    {{/if}}
+  </section>
+
+  <section id="pf1-section-calendar" class="panel calendar-panel pf1-scroll-target">
+    <div class="panel-title-row calendar-title-row">
+      <div>
+        <h2>Calendrier et évolution de la communauté</h2>
+        <p class="small-note">Le Guide du Maître recommande de tenir un calendrier de campagne et d'y placer jours saints, festivals et événements importants afin de rythmer la campagne et de créer des accroches d'aventure.</p>
+      </div>
+      <div class="calendar-current-date">
+        <span>Date actuelle</span>
+        <strong>{{calendarDateLabel}}</strong>
+      </div>
+    </div>
+
+    {{#if isGM}}
+    <div class="calendar-actions">
+      <button type="button" data-action="calendar-advance" data-days="1"><i class="fas fa-forward-step"></i> +1 jour</button>
+      <button type="button" data-action="calendar-advance" data-days="7"><i class="fas fa-forward-fast"></i> +7 jours</button>
+      <button type="button" data-action="calendar-advance-custom"><i class="fas fa-clock"></i> Avancer...</button>
+      <button type="button" data-action="calendar-set-date"><i class="fas fa-calendar-check"></i> Définir la date</button>
+      <button type="button" data-action="calendar-settings"><i class="fas fa-gears"></i> Configurer</button>
+    </div>
+    {{/if}}
+    <p class="small-note">Calendrier : {{calendarMonthCount}} mois · {{calendarWeekdayCount}} jours par semaine{{#if calendarSyncMarket}} · synchronisation du marché activée{{/if}}. Les valeurs par défaut sont génériques et peuvent être remplacées par celles de ta campagne.</p>
+
+    <div class="calendar-grid">
+      <div class="calendar-column">
+        <div class="urban-column-header">
+          <div><strong>Dates importantes</strong><span>Jours saints, fêtes, foires, échéances et événements</span></div>
+          {{#if isGM}}<button type="button" data-action="calendar-add-entry"><i class="fas fa-calendar-plus"></i> Ajouter</button>{{/if}}
+        </div>
+        {{#if hasCalendarEntries}}
+        <ol class="calendar-entry-list">
+          {{#each calendarEntries}}
+          <li class="{{statusClass}}">
+            <div class="calendar-date-chip"><span>{{dateLabel}}</span><small>{{recurrenceLabel}}</small></div>
+            <div class="calendar-entry-main">
+              <strong>{{title}}</strong>
+              <div class="urban-meta"><span>{{typeLabel}}</span><span class="calendar-status {{statusClass}}">{{statusLabel}}</span>{{#if locationName}}<span>{{locationName}}</span>{{/if}}{{#if factionName}}<span>{{factionName}}</span>{{/if}}</div>
+              {{#if description}}<p>{{description}}</p>{{/if}}
+              {{#if @root.isGM}}{{#if notes}}<small class="gm-note"><b>Notes MJ :</b> {{notes}}</small>{{/if}}{{/if}}
+            </div>
+            <div class="law-row-actions">
+              <button type="button" data-action="calendar-post-entry" data-id="{{id}}" title="Publier dans le chat"><i class="fas fa-comment"></i></button>
+              {{#if @root.isGM}}<button type="button" data-action="calendar-edit-entry" data-id="{{id}}" title="Modifier"><i class="fas fa-pen"></i></button><button type="button" data-action="calendar-remove-entry" data-id="{{id}}" title="Supprimer"><i class="fas fa-trash"></i></button>{{/if}}
+            </div>
+          </li>
+          {{/each}}
+        </ol>
+        {{else}}<div class="empty-box"><i class="fas fa-calendar-day"></i> Aucune date importante enregistrée.</div>{{/if}}
+      </div>
+
+      <div class="calendar-column">
+        <div class="urban-column-header">
+          <div><strong>Travaux et projets</strong><span>Évolution visible de la ville pendant le temps d'immobilisation</span></div>
+          {{#if isGM}}<button type="button" data-action="calendar-add-project"><i class="fas fa-hammer"></i> Ajouter</button>{{/if}}
+        </div>
+        {{#if hasCalendarProjects}}
+        <ol class="calendar-project-list">
+          {{#each calendarProjects}}
+          <li class="{{statusClass}}">
+            <div class="calendar-project-main">
+              <strong>{{title}}</strong>
+              <div class="urban-meta"><span>{{typeLabel}}</span><span class="calendar-status {{statusClass}}">{{statusLabel}}</span>{{#if locationName}}<span>{{locationName}}</span>{{/if}}{{#if factionName}}<span>{{factionName}}</span>{{/if}}</div>
+              <small>{{startLabel}} → {{finishLabel}} · {{durationDays}} jour(s)</small>
+              <div class="calendar-progress"><div style="width: {{progressPct}}%"></div></div>
+              <small>{{progressText}} · {{progressPct}} %</small>
+              {{#if description}}<p>{{description}}</p>{{/if}}
+              {{#if @root.isGM}}{{#if notes}}<small class="gm-note"><b>Notes MJ :</b> {{notes}}</small>{{/if}}{{/if}}
+            </div>
+            {{#if @root.isGM}}<div class="law-row-actions"><button type="button" data-action="calendar-edit-project" data-id="{{id}}" title="Modifier"><i class="fas fa-pen"></i></button><button type="button" data-action="calendar-remove-project" data-id="{{id}}" title="Supprimer"><i class="fas fa-trash"></i></button></div>{{/if}}
+          </li>
+          {{/each}}
+        </ol>
+        {{else}}<div class="empty-box"><i class="fas fa-person-digging"></i> Aucun projet enregistré.</div>{{/if}}
+      </div>
+    </div>
+
+    {{#if isGM}}
+    <div class="calendar-evolution-grid">
+      <div class="calendar-history-card">
+        <div class="urban-column-header">
+          <div><strong>Démographie</strong><span>Historique des variations de population</span></div>
+          <button type="button" data-action="calendar-population-change"><i class="fas fa-users"></i> Variation</button>
+        </div>
+        {{#if hasCalendarPopulationHistory}}
+        <ol class="calendar-history-list">
+          {{#each calendarPopulationHistory}}
+          <li><div><strong>{{reason}}</strong><small>{{dateLabel}} · {{typeLabel}}</small></div><div class="population-delta"><b>{{deltaLabel}}</b><small>{{previousLabel}} → {{nextLabel}}</small></div></li>
+          {{/each}}
+        </ol>
+        <button type="button" class="compact" data-action="calendar-clear-population"><i class="fas fa-broom"></i> Effacer l'historique</button>
+        {{else}}<p class="small-note">Aucune variation de population enregistrée.</p>{{/if}}
+      </div>
+
+      <div class="calendar-history-card">
+        <div class="urban-column-header">
+          <div><strong>Chronique</strong><span>100 dernières évolutions enregistrées par le module</span></div>
+        </div>
+        {{#if hasCalendarTimeline}}
+        <ol class="calendar-history-list timeline-list">
+          {{#each calendarTimeline}}<li><div><strong>{{title}}</strong><small>{{dateLabel}}{{#if description}} · {{description}}{{/if}}</small></div></li>{{/each}}
+        </ol>
+        <button type="button" class="compact" data-action="calendar-clear-timeline"><i class="fas fa-broom"></i> Effacer la chronique</button>
+        {{else}}<p class="small-note">La chronique se remplira à mesure que le temps et la communauté évolueront.</p>{{/if}}
+      </div>
+    </div>
+    {{/if}}
+  </section>
+
+  <section id="pf1-section-politics" class="panel politics-panel pf1-scroll-target">
+    <div class="panel-title-row politics-title-row">
+      <div>
+        <h2>Politique et opinion publique</h2>
+        <p class="small-note">Les modificateurs de communauté du Guide du Maître influencent directement plusieurs interactions sociales. Les scores d'opinion, de réputation, de tension et de troubles ci-dessous sont des outils de suivi du module, pas de nouvelles règles PF1.</p>
+      </div>
+      <div class="politics-overview-badges">
+        <div class="politics-opinion-badge {{politicsOpinionClass}}"><span>Opinion publique</span><strong>{{politicsOpinionLabel}}</strong><small>{{politicsOpinionScoreLabel}}</small></div>
+        <div class="politics-unrest-badge unrest-{{politicsUnrestLevel}}"><span>Troubles sociaux</span><strong>{{politicsUnrestLabel}}</strong></div>
+      </div>
+    </div>
+
+    <div class="politics-actions">
+      {{#if isGM}}<button type="button" data-action="politics-set-opinion"><i class="fas fa-people-arrows"></i> Opinion</button>{{/if}}
+      {{#if isGM}}<button type="button" data-action="politics-set-unrest"><i class="fas fa-fire-flame-curved"></i> Troubles</button>{{/if}}
+      <button type="button" data-action="politics-community-check"><i class="fas fa-dice-d20"></i> Test de communauté</button>
+      <button type="button" data-action="politics-post-overview"><i class="fas fa-comment"></i> Publier l'état</button>
+    </div>
+
+    <div class="politics-modifier-strip">
+      <div><span>Corruption</span><strong>{{politicsCorruptionLabel}}</strong><small>Bluff officiels, Discrétion extérieure</small></div>
+      <div><span>Criminalité</span><strong>{{politicsCrimeLabel}}</strong><small>Psychologie anti-Bluff, Escamotage</small></div>
+      <div><span>Économie</span><strong>{{politicsEconomyLabel}}</strong><small>Revenus Artisanat, Représentation, Profession</small></div>
+      <div><span>Loi</span><strong>{{politicsLawLabel}}</strong><small>Diplomatie gouvernement, Intimidation</small></div>
+      <div><span>Folklore</span><strong>{{politicsLoreLabel}}</strong><small>Rassembler des informations, recherches</small></div>
+      <div><span>Société</span><strong>{{politicsSocietyLabel}}</strong><small>Déguisement, Diplomatie non-gouvernementale</small></div>
+    </div>
+
+    <div class="politics-rules-grid">
+      <div class="politics-rule-card"><strong>Société et accueil</strong><p>Le Guide du Maître décrit la Société comme le degré de civilisation et d'ouverture d'esprit. Un score faible traduit une population plus suspicieuse envers les étrangers ; son modificateur s'applique au Déguisement et à la Diplomatie pour modifier l'attitude des non-fonctionnaires gouvernementaux.</p></div>
+      <div class="politics-rule-card"><strong>Loi et autorités</strong><p>La Loi reflète la rigidité des édits et l'organisation de la garde. Elle intervient notamment sur la Diplomatie contre les fonctionnaires du gouvernement et sur l'Intimidation utilisée pour obliger quelqu'un à réagir amicalement.</p></div>
+      <div class="politics-rule-card"><strong>Folklore et information</strong><p>Le Folklore mesure la facilité avec laquelle les habitants bavardent et l'accès aux ressources savantes. Il modifie la Diplomatie pour rassembler des informations et certaines recherches de Connaissances.</p></div>
+      <div class="politics-rule-card"><strong>Corruption, crime et économie</strong><p>La Corruption intervient sur Bluff contre fonctionnaires/gardes et Discrétion en extérieur ; la Criminalité sur Psychologie contre les Bluff et Escamotage ; l'Économie sur les tests destinés à générer des revenus.</p></div>
+    </div>
+
+    {{#if isGM}}
+      {{#if politicsOpinionNotes}}<p class="gm-note"><b>Opinion — notes MJ :</b> {{politicsOpinionNotes}}</p>{{/if}}
+      {{#if politicsUnrestNotes}}<p class="gm-note"><b>Troubles — notes MJ :</b> {{politicsUnrestNotes}}</p>{{/if}}
+    {{/if}}
+    <p class="small-note politics-unrest-description">{{politicsUnrestDescription}}</p>
+
+    <div class="politics-grid">
+      <div class="politics-column">
+        <div class="urban-column-header">
+          <div><strong>Réputations locales</strong><span>PJ, groupes ou personnalités connues dans la communauté</span></div>
+          {{#if isGM}}<button type="button" data-action="politics-add-reputation"><i class="fas fa-user-plus"></i> Ajouter</button>{{/if}}
+        </div>
+        {{#if hasPoliticsReputations}}
+        <ol class="politics-reputation-list">
+          {{#each politicsReputations}}
+          <li class="{{attitudeClass}}{{#if missing}} missing{{/if}}">
+            <img src="{{img}}" alt="{{subjectDisplay}}">
+            <div class="politics-reputation-main">
+              <strong>{{subjectDisplay}}</strong>
+              <div class="urban-meta"><span class="politics-attitude {{attitudeClass}}">{{attitudeLabel}} {{scoreLabel}}</span><span>{{visibilityLabel}}</span></div>
+              {{#if @root.isGM}}{{#if notes}}<small class="gm-note"><b>Notes MJ :</b> {{notes}}</small>{{/if}}{{/if}}
+            </div>
+            <div class="law-row-actions">
+              {{#if actorUuid}}{{#unless missing}}<button type="button" data-action="politics-open-actor" data-uuid="{{actorUuid}}" title="Ouvrir l'Actor"><i class="fas fa-arrow-up-right-from-square"></i></button>{{/unless}}{{/if}}
+              <button type="button" data-action="politics-post-reputation" data-id="{{id}}" title="Publier"><i class="fas fa-comment"></i></button>
+              {{#if @root.isGM}}<button type="button" data-action="politics-edit-reputation" data-id="{{id}}" title="Modifier"><i class="fas fa-pen"></i></button><button type="button" data-action="politics-remove-reputation" data-id="{{id}}" title="Supprimer"><i class="fas fa-trash"></i></button>{{/if}}
+            </div>
+          </li>
+          {{/each}}
+        </ol>
+        {{else}}<div class="empty-box"><i class="fas fa-users-viewfinder"></i> Aucune réputation locale structurée.</div>{{/if}}
+      </div>
+
+      <div class="politics-column">
+        <div class="urban-column-header">
+          <div><strong>Tensions entre factions</strong><span>Conflits politiques propres à cette ville ou ce quartier</span></div>
+          {{#if isGM}}<button type="button" data-action="politics-add-tension"><i class="fas fa-arrows-left-right-to-line"></i> Ajouter</button>{{/if}}
+        </div>
+        {{#if hasPoliticsTensions}}
+        <ol class="politics-tension-list">
+          {{#each politicsTensions}}
+          <li class="{{levelClass}}">
+            <div class="politics-tension-main">
+              <strong>{{factionAName}} <i class="fas fa-bolt"></i> {{factionBName}}</strong>
+              <div class="urban-meta"><span>{{levelLabel}}</span><span class="politics-trend {{trendClass}}">{{trendLabel}}</span><span>{{visibilityLabel}}</span></div>
+              {{#if issue}}<p>{{issue}}</p>{{/if}}
+              {{#if @root.isGM}}{{#if notes}}<small class="gm-note"><b>Notes MJ :</b> {{notes}}</small>{{/if}}{{/if}}
+            </div>
+            <div class="law-row-actions">
+              <button type="button" data-action="politics-post-tension" data-id="{{id}}" title="Publier"><i class="fas fa-comment"></i></button>
+              {{#if @root.isGM}}<button type="button" data-action="politics-edit-tension" data-id="{{id}}" title="Modifier"><i class="fas fa-pen"></i></button><button type="button" data-action="politics-remove-tension" data-id="{{id}}" title="Supprimer"><i class="fas fa-trash"></i></button>{{/if}}
+            </div>
+          </li>
+          {{/each}}
+        </ol>
+        {{else}}<div class="empty-box"><i class="fas fa-handshake"></i> Aucune tension structurée entre factions.</div>{{/if}}
+      </div>
+    </div>
+
+    <div class="politics-consequence-section">
+      <div class="urban-column-header">
+        <div><strong>Conséquences des actions</strong><span>Impact choisi par le MJ sur l'opinion publique et les troubles sociaux</span></div>
+        {{#if isGM}}<button type="button" data-action="politics-add-consequence"><i class="fas fa-scale-balanced"></i> Ajouter une conséquence</button>{{/if}}
+      </div>
+      {{#if hasPoliticsConsequences}}
+      <ol class="politics-consequence-list">
+        {{#each politicsConsequences}}
+        <li>
+          <div class="politics-consequence-main">
+            <strong>{{title}}</strong>
+            <div class="urban-meta">{{#if campaignDate}}<span>{{campaignDate}}</span>{{else}}<span>{{timeLabel}}</span>{{/if}}{{#if factionName}}<span>{{factionName}}</span>{{/if}}<span>{{visibilityLabel}}</span></div>
+            {{#if description}}<p>{{description}}</p>{{/if}}
+            <div class="politics-deltas"><span>Opinion <b>{{publicOpinionDeltaLabel}}</b></span><span>Troubles <b>{{unrestDeltaLabel}}</b></span></div>
+            {{#if @root.isGM}}{{#if notes}}<small class="gm-note"><b>Notes MJ :</b> {{notes}}</small>{{/if}}{{/if}}
+          </div>
+          <div class="law-row-actions">
+            <button type="button" data-action="politics-post-consequence" data-id="{{id}}" title="Publier"><i class="fas fa-comment"></i></button>
+            {{#if @root.isGM}}<button type="button" data-action="politics-remove-consequence" data-id="{{id}}" title="Retirer de l'historique sans annuler ses effets"><i class="fas fa-trash"></i></button>{{/if}}
+          </div>
+        </li>
+        {{/each}}
+      </ol>
+      {{#if isGM}}<button type="button" class="compact" data-action="politics-clear-history"><i class="fas fa-broom"></i> Effacer l'historique</button>{{/if}}
+      {{else}}<div class="empty-box"><i class="fas fa-scale-balanced"></i> Aucune conséquence politique enregistrée.</div>{{/if}}
+      <p class="small-note">Supprimer une ligne de l'historique ne revient pas automatiquement sur ses effets : l'opinion et les troubles sont des valeurs actuelles que le MJ peut ajuster séparément.</p>
+    </div>
+  </section>
+
+  <section id="pf1-section-legislation" class="panel legislation-panel pf1-scroll-target">
+    <div class="panel-title-row legislation-title-row">
+      <div>
+        <h2><i class="fas fa-scale-balanced"></i> Lois, édits et fiscalité</h2>
+        <p class="small-note">Registre local des règles décidées par le MJ. La caractéristique <strong>Loi {{legislationLawModifierLabel}}</strong> reste le modificateur PF1 officiel ; les textes, peines et taxes ci-dessous sont des données de campagne.</p>
+      </div>
+      <div class="legislation-summary-badges">
+        <span><b>{{legislationActiveLawCount}}</b> textes en vigueur</span>
+        <span><b>{{legislationActiveLevyCount}}</b> prélèvements actifs</span>
+      </div>
+    </div>
+
+    <div class="legislation-actions">
+      {{#if isGM}}<button type="button" data-action="legislation-add-law"><i class="fas fa-file-signature"></i> Ajouter une loi</button>{{/if}}
+      {{#if isGM}}<button type="button" data-action="legislation-add-levy"><i class="fas fa-coins"></i> Ajouter une taxe</button>{{/if}}
+      <button type="button" data-action="legislation-calc-levy"><i class="fas fa-calculator"></i> Calculer un prélèvement</button>
+      <button type="button" data-action="legislation-post-code"><i class="fas fa-bullhorn"></i> Publier le code local</button>
+    </div>
+
+    <div class="legislation-rule-box">
+      <i class="fas fa-circle-info"></i>
+      <div><strong>Ce que le module automatise</strong><p>Les fiches mémorisent les édits, leur statut, les sanctions décidées par le MJ, les taxes et les autorités concernées. Une infraction peut être envoyée directement au registre criminel de la v1.6, et l'impact politique d'une loi peut être appliqué au système d'opinion de la v1.8.</p></div>
+    </div>
+
+    <div class="legislation-grid">
+      <div class="legislation-column">
+        <div class="urban-column-header">
+          <div><strong>Lois et édits</strong><span>Interdictions, permis, couvre-feux et réglementations locales</span></div>
+        </div>
+        {{#if hasLegislationLaws}}
+        <ol class="legislation-law-list">
+          {{#each legislationLaws}}
+          <li class="law-status-{{statusClass}}">
+            <div class="legislation-law-main">
+              <div class="legislation-row-title"><strong>{{title}}</strong><span class="legislation-status {{statusClass}}">{{statusLabel}}</span></div>
+              <div class="urban-meta"><span>{{typeLabel}}</span><span>{{visibilityLabel}}</span>{{#if effectiveDate}}<span>{{effectiveDate}}</span>{{/if}}</div>
+              {{#if scope}}<p><b>Champ :</b> {{scope}}</p>{{/if}}
+              {{#if description}}<p>{{description}}</p>{{/if}}
+              {{#if enforcement}}<p><b>Application :</b> {{enforcement}}</p>{{/if}}
+              {{#if penalty}}<p><b>Sanction :</b> {{penalty}}</p>{{/if}}
+              <div class="urban-meta">{{#if factionName}}<span><i class="fas fa-landmark"></i> {{factionName}}</span>{{/if}}{{#if locationName}}<span><i class="fas fa-location-dot"></i> {{locationName}}</span>{{/if}}</div>
+              {{#if @root.isGM}}
+                <div class="legislation-gm-data"><span>Infraction : gravité {{crimeSeverity}}</span>{{#if defaultFine}}<span>Amende {{fineLabel}} po</span>{{/if}}{{#if defaultSentence}}<span>{{defaultSentence}}</span>{{/if}}<span>Opinion {{publicOpinionDeltaLabel}}</span><span>Troubles {{unrestDeltaLabel}}</span></div>
+                {{#if notes}}<small class="gm-note"><b>Notes MJ :</b> {{notes}}</small>{{/if}}
+              {{/if}}
+            </div>
+            <div class="law-row-actions legislation-row-actions">
+              <button type="button" data-action="legislation-post-law" data-id="{{id}}" title="Publier"><i class="fas fa-comment"></i></button>
+              {{#if @root.isGM}}<button type="button" data-action="legislation-violation" data-id="{{id}}" title="Enregistrer une infraction"><i class="fas fa-gavel"></i></button><button type="button" data-action="legislation-political-impact" data-id="{{id}}" title="Appliquer l'impact politique"><i class="fas fa-users-rays"></i></button><button type="button" data-action="legislation-edit-law" data-id="{{id}}" title="Modifier"><i class="fas fa-pen"></i></button><button type="button" data-action="legislation-remove-law" data-id="{{id}}" title="Supprimer"><i class="fas fa-trash"></i></button>{{/if}}
+            </div>
+          </li>
+          {{/each}}
+        </ol>
+        {{else}}<div class="empty-box"><i class="fas fa-scroll"></i> Aucun texte juridique enregistré.</div>{{/if}}
+      </div>
+
+      <div class="legislation-column">
+        <div class="urban-column-header">
+          <div><strong>Taxes et prélèvements</strong><span>Dîmes, droits de douane, péages et taxes de marché</span></div>
+        </div>
+        {{#if hasLegislationLevies}}
+        <ol class="legislation-levy-list">
+          {{#each legislationLevies}}
+          <li class="levy-{{activeClass}}">
+            <div class="legislation-levy-main">
+              <div class="legislation-row-title"><strong>{{title}}</strong><span class="legislation-status {{activeClass}}">{{activeLabel}}</span></div>
+              <div class="urban-meta"><span>{{typeLabel}}</span><span>{{rateLabel}}</span><span>{{frequencyLabel}}</span><span>{{visibilityLabel}}</span></div>
+              {{#if appliesTo}}<p><b>S'applique à :</b> {{appliesTo}}</p>{{/if}}
+              {{#if exemptions}}<p><b>Exemptions :</b> {{exemptions}}</p>{{/if}}
+              <div class="urban-meta">{{#if factionName}}<span><i class="fas fa-hand-holding-dollar"></i> {{factionName}}</span>{{/if}}{{#if locationName}}<span><i class="fas fa-location-dot"></i> {{locationName}}</span>{{/if}}{{#if marketApplicable}}<span><i class="fas fa-store"></i> Marché</span>{{/if}}</div>
+              {{#if @root.isGM}}{{#if notes}}<small class="gm-note"><b>Notes MJ :</b> {{notes}}</small>{{/if}}{{/if}}
+            </div>
+            <div class="law-row-actions legislation-row-actions">
+              <button type="button" data-action="legislation-post-levy" data-id="{{id}}" title="Publier"><i class="fas fa-comment"></i></button>
+              {{#if @root.isGM}}<button type="button" data-action="legislation-edit-levy" data-id="{{id}}" title="Modifier"><i class="fas fa-pen"></i></button><button type="button" data-action="legislation-remove-levy" data-id="{{id}}" title="Supprimer"><i class="fas fa-trash"></i></button>{{/if}}
+            </div>
+          </li>
+          {{/each}}
+        </ol>
+        {{else}}<div class="empty-box"><i class="fas fa-coins"></i> Aucun prélèvement enregistré.</div>{{/if}}
+      </div>
+    </div>
+
+    {{#if isGM}}
+    <div class="legislation-history-section">
+      <div class="urban-column-header">
+        <div><strong>Historique juridique</strong><span>Créations, suppressions et changements de statut</span></div>
+        {{#if hasLegislationHistory}}<button type="button" class="compact" data-action="legislation-clear-history"><i class="fas fa-broom"></i> Effacer</button>{{/if}}
+      </div>
+      {{#if hasLegislationHistory}}
+      <ol class="legislation-history-list">
+        {{#each legislationHistory}}
+        <li><strong>{{title}}</strong><span>{{#if campaignDate}}{{campaignDate}}{{else}}{{timeLabel}}{{/if}}</span>{{#if detail}}<small>{{detail}}</small>{{/if}}</li>
+        {{/each}}
+      </ol>
+      {{else}}<div class="empty-box"><i class="fas fa-clock-rotate-left"></i> Aucun historique juridique.</div>{{/if}}
+    </div>
+    {{/if}}
+  </section>
+
+  <section class="panel">
+    <h2>Ajustements personnalisés</h2>
+    <p class="small-note">Ces valeurs sont des ajustements additifs pratiques pour les suppléments, les quartiers spéciaux ou les règles maison.</p>
+    <div class="adjustment-grid">
+      <label>Corruption <input type="number" name="settlement.adjustments.corruption" value="{{config.adjustments.corruption}}"></label>
+      <label>Criminalité <input type="number" name="settlement.adjustments.crime" value="{{config.adjustments.crime}}"></label>
+      <label>Économie <input type="number" name="settlement.adjustments.economy" value="{{config.adjustments.economy}}"></label>
+      <label>Loi <input type="number" name="settlement.adjustments.law" value="{{config.adjustments.law}}"></label>
+      <label>Folklore <input type="number" name="settlement.adjustments.lore" value="{{config.adjustments.lore}}"></label>
+      <label>Société <input type="number" name="settlement.adjustments.society" value="{{config.adjustments.society}}"></label>
+      <label>Danger <input type="number" name="settlement.adjustments.danger" value="{{config.adjustments.danger}}"></label>
+      <label>Valeur de base (po) <input type="number" name="settlement.adjustments.baseValue" value="{{config.adjustments.baseValue}}"></label>
+      <label>Limite d'achat (po) <input type="number" name="settlement.adjustments.purchaseLimit" value="{{config.adjustments.purchaseLimit}}"></label>
+      <label>Incantation <input type="number" name="settlement.adjustments.spellcasting" value="{{config.adjustments.spellcasting}}"></label>
+    </div>
+  </section>
+
+  <section id="pf1-section-notes" class="settlement-grid notes-grid pf1-scroll-target">
+    <div class="panel">
+      <h2>Localités — notes libres</h2>
+      <p class="small-note">Ancien champ conservé pour compatibilité avec les fiches v1.0/v1.1. Utilise de préférence les fiches « Lieux et établissements » ci-dessus.</p>
+      <textarea name="settlement.locations" rows="7" placeholder="Notes libres sur les localités...">{{config.locations}}</textarea>
+    </div>
+    <div class="panel">
+      <h2>Groupes / factions — notes libres</h2>
+      <p class="small-note">Ancien champ conservé pour compatibilité. Utilise de préférence les fiches « Factions et organisations » ci-dessus.</p>
+      <textarea name="settlement.factions" rows="7" placeholder="Notes libres sur les groupes et factions...">{{config.factions}}</textarea>
+    </div>
+    <div class="panel">
+      <h2>Idées d'aventure / rumeurs</h2>
+      <textarea name="settlement.rumors" rows="7">{{config.rumors}}</textarea>
+    </div>
+    <div class="panel">
+      <h2>Notes</h2>
+      <textarea name="settlement.notes" rows="7">{{config.notes}}</textarea>
+    </div>
+  </section>
+
+  <footer class="settlement-footer">
+    <button type="submit"><i class="fas fa-floppy-disk"></i> Enregistrer / recalculer</button>
+  </footer>
+</div>

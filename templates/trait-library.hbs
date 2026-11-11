@@ -1,0 +1,39 @@
+<section class="trait-library-shell">
+  <header class="trait-library-header">
+    <div>
+      <strong>Bibliothèque de traits de communauté</strong>
+      <p>Réutilise les avantages et inconvénients entre plusieurs villes. Les traits intégrés restent disponibles dans les fiches normales ; les traits personnels sont enregistrés pour ce monde.</p>
+    </div>
+    <div class="manager-header-actions">
+      <button type="button" data-action="create"><i class="fas fa-plus"></i> Nouveau trait</button>
+      <button type="button" data-action="import"><i class="fas fa-file-import"></i> Importer</button>
+      <button type="button" data-action="export"><i class="fas fa-file-export"></i> Exporter</button>
+    </div>
+  </header>
+
+  <div class="trait-library-summary"><strong>{{customCount}}</strong> trait(s) personnel(s) · les traits intégrés indiquent leur source.</div>
+
+  <div class="trait-library-list">
+    {{#each traits}}
+    <article class="trait-library-card {{kind}} {{#if builtin}}builtin{{else}}custom{{/if}}">
+      <div class="trait-library-card-main">
+        <div class="trait-library-title-row">
+          <strong>{{label}}</strong>
+          <span class="trait-kind-badge">{{kindLabel}}</span>
+          {{#if builtin}}<span class="trait-builtin-badge">Intégré</span>{{/if}}
+        </div>
+        {{#if description}}<p>{{description}}</p>{{/if}}
+        <small><i class="fas fa-book"></i> <strong>Source :</strong> {{source}}{{#if sourceTypeLabel}} · {{sourceTypeLabel}}{{/if}}</small>
+        <small class="trait-effects-summary">{{effectsSummary}}</small>
+      </div>
+      <div class="trait-library-actions">
+        <button type="button" data-action="apply" data-id="{{id}}"><i class="fas fa-arrow-right-to-city"></i> Appliquer</button>
+        {{#unless builtin}}
+        <button type="button" data-action="edit" data-id="{{id}}" title="Modifier"><i class="fas fa-pen"></i></button>
+        <button type="button" data-action="delete" data-id="{{id}}" title="Supprimer"><i class="fas fa-trash"></i></button>
+        {{/unless}}
+      </div>
+    </article>
+    {{/each}}
+  </div>
+</section>

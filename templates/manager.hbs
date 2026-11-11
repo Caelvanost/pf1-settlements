@@ -1,0 +1,140 @@
+<section class="settlement-manager-shell">
+  <header>
+    <div>
+      <strong>Villes, quartiers, lieux et factions PF1</strong>
+      <p>Gestion complète des communautés, duplication, modèles et import/export.</p>
+    </div>
+    <div class="manager-header-actions">
+      <button type="button" data-action="generator"><i class="fas fa-wand-magic-sparkles"></i> Assistant</button>
+      <button type="button" data-action="network"><i class="fas fa-diagram-project"></i> Réseau politique</button>
+      <button type="button" data-action="trait-library"><i class="fas fa-book-open"></i> Bibliothèque de traits</button>
+      <button type="button" data-action="create"><i class="fas fa-plus"></i> Nouvelle ville</button>
+      <button type="button" data-action="create-faction"><i class="fas fa-people-group"></i> Nouvelle faction</button>
+      <button type="button" data-action="import"><i class="fas fa-file-import"></i> Importer</button>
+    </div>
+  </header>
+
+  <ol class="settlement-list settlement-tree">
+    {{#each settlements}}
+    <li class="settlement-root-row">
+      <div class="settlement-row-main">
+        <div><strong><i class="fas fa-city"></i> {{name}}</strong><small>{{type}} · Population {{population}} · {{districts.length}} quartier(s) · {{locationCount}} lieu(x) · {{factionCount}} faction(s)</small></div>
+        <div class="settlement-row-actions">
+          <button type="button" data-action="create-district" data-id="{{id}}" title="Créer un quartier"><i class="fas fa-map"></i></button>
+          <button type="button" data-action="create-location" data-id="{{id}}" title="Créer un lieu"><i class="fas fa-shop"></i></button>
+          <button type="button" data-action="duplicate" data-id="{{id}}" title="Dupliquer"><i class="fas fa-copy"></i></button>
+          <button type="button" data-action="save-template" data-id="{{id}}" title="Enregistrer comme modèle"><i class="fas fa-bookmark"></i></button>
+          <button type="button" data-action="export" data-id="{{id}}" title="Exporter en JSON"><i class="fas fa-file-export"></i></button>
+          <button type="button" data-action="reset-generated" data-id="{{id}}" title="Réinitialiser les données générées"><i class="fas fa-rotate-left"></i></button>
+          <button type="button" data-action="transform" data-id="{{id}}" title="Transformer en quartier"><i class="fas fa-right-left"></i></button>
+          <button type="button" data-action="open" data-id="{{id}}"><i class="fas fa-pen-to-square"></i> Ouvrir</button>
+        </div>
+      </div>
+
+      {{#if districts.length}}
+      <ol class="district-list">
+        {{#each districts}}
+        <li>
+          <div><strong><i class="fas fa-location-dot"></i> {{name}}</strong><small>{{type}} · Population {{population}} · {{locationCount}} lieu(x) · {{factionCount}} faction(s)</small></div>
+          <div class="settlement-row-actions">
+            <button type="button" data-action="create-location" data-id="{{id}}" title="Créer un lieu"><i class="fas fa-shop"></i></button>
+            <button type="button" data-action="duplicate" data-id="{{id}}" title="Dupliquer"><i class="fas fa-copy"></i></button>
+            <button type="button" data-action="save-template" data-id="{{id}}" title="Enregistrer comme modèle"><i class="fas fa-bookmark"></i></button>
+            <button type="button" data-action="export" data-id="{{id}}" title="Exporter"><i class="fas fa-file-export"></i></button>
+            <button type="button" data-action="reset-generated" data-id="{{id}}" title="Réinitialiser les données générées"><i class="fas fa-rotate-left"></i></button>
+            <button type="button" data-action="transform" data-id="{{id}}" title="Transformer en ville"><i class="fas fa-right-left"></i></button>
+            <button type="button" data-action="open" data-id="{{id}}"><i class="fas fa-pen-to-square"></i> Ouvrir</button>
+          </div>
+        </li>
+        {{/each}}
+      </ol>
+      {{/if}}
+
+      {{#if locations.length}}
+      <ol class="manager-location-list">
+        {{#each locations}}
+        <li>
+          <div><strong><i class="fas fa-shop"></i> {{name}}</strong><small>{{type}}{{#if districtName}} · {{districtName}}{{/if}}{{#if address}} · {{address}}{{/if}}</small></div>
+          <button type="button" data-action="open" data-id="{{id}}"><i class="fas fa-pen-to-square"></i> Ouvrir</button>
+        </li>
+        {{/each}}
+      </ol>
+      {{/if}}
+    </li>
+    {{else}}
+    <li class="empty">Aucune fiche de ville pour le moment.</li>
+    {{/each}}
+  </ol>
+
+  <section class="manager-template-section">
+    <div class="panel-title-row">
+      <div>
+        <h3><i class="fas fa-layer-group"></i> Modèles de communautés</h3>
+        <p>Les modèles génériques sont fournis par le module. Les modèles personnels peuvent être créés depuis n'importe quelle fiche de communauté.</p>
+      </div>
+    </div>
+    <ol class="settlement-list compact template-manager-list">
+      {{#each templates}}
+      <li>
+        <div>
+          <strong>{{label}}</strong>
+          <small>{{description}}{{#if builtin}} · Modèle intégré{{else}} · Modèle personnel{{/if}}</small>
+        </div>
+        <div class="settlement-row-actions">
+          <button type="button" data-action="create-from-template" data-id="{{id}}"><i class="fas fa-plus"></i> Créer</button>
+          {{#unless builtin}}
+          <button type="button" data-action="delete-template" data-id="{{id}}" title="Supprimer le modèle"><i class="fas fa-trash"></i></button>
+          {{/unless}}
+        </div>
+      </li>
+      {{/each}}
+    </ol>
+  </section>
+
+  <section class="manager-faction-section">
+    <div class="panel-title-row">
+      <div><h3><i class="fas fa-people-group"></i> Factions et organisations</h3><p>Guildes, cultes, autorités, maisons, bandes et autres groupes actifs dans une ou plusieurs communautés.</p></div>
+      <button type="button" data-action="create-faction"><i class="fas fa-plus"></i> Créer</button>
+    </div>
+    <ol class="settlement-list compact faction-manager-list">
+      {{#each factions}}
+      <li>
+        <div><strong>{{name}}</strong><small>{{type}}{{#if leaderName}} · Chef : {{leaderName}}{{/if}} · {{influenceCount}} zone(s) · {{relationCount}} relation(s)</small></div>
+        <button type="button" data-action="open" data-id="{{id}}"><i class="fas fa-pen-to-square"></i> Ouvrir</button>
+      </li>
+      {{else}}
+      <li class="empty">Aucune faction pour le moment.</li>
+      {{/each}}
+    </ol>
+  </section>
+
+  {{#if orphans.length}}
+  <section class="orphan-section">
+    <h3><i class="fas fa-triangle-exclamation"></i> Quartiers orphelins</h3>
+    <p>Leur ville parente n'existe plus. Ouvre leur fiche pour choisir une nouvelle ville parente ou « Aucune ».</p>
+    <ol class="settlement-list compact">
+      {{#each orphans}}
+      <li>
+        <div><strong>{{name}}</strong><small>{{type}} · Population {{population}}</small></div>
+        <button type="button" data-action="open" data-id="{{id}}"><i class="fas fa-pen-to-square"></i> Ouvrir</button>
+      </li>
+      {{/each}}
+    </ol>
+  </section>
+  {{/if}}
+
+  {{#if orphanLocations.length}}
+  <section class="orphan-section">
+    <h3><i class="fas fa-triangle-exclamation"></i> Lieux orphelins</h3>
+    <p>Ces fiches ne sont rattachées à aucune ville existante. Ouvre-les pour sélectionner une communauté.</p>
+    <ol class="settlement-list compact">
+      {{#each orphanLocations}}
+      <li>
+        <div><strong><i class="fas fa-shop"></i> {{name}}</strong><small>{{type}}{{#if address}} · {{address}}{{/if}}</small></div>
+        <button type="button" data-action="open" data-id="{{id}}"><i class="fas fa-pen-to-square"></i> Ouvrir</button>
+      </li>
+      {{/each}}
+    </ol>
+  </section>
+  {{/if}}
+</section>
