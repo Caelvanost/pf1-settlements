@@ -2,7 +2,7 @@
   "id": "pf1-settlements",
   "title": "PF1 - Villes et Communautés",
   "description": "Gestion avancée des villes, quartiers, lieux, factions, marchés, vie urbaine, garde, criminalité, calendrier, politique, lois, génération assistée, modèles, import/export, réseau politique, traits personnalisés et bibliothèque de traits des communautés de Pathfinder 1.",
-  "version": "2.6.1",
+  "version": "2.6.2",
   "compatibility": {
     "minimum": "13",
     "verified": "13"
@@ -10,6 +10,9 @@
   "authors": [
     {
       "name": "Gélik"
+    },
+    {
+      "name": "Caelvanost"
     }
   ],
   "esmodules": [
@@ -34,6 +37,6 @@
     ]
   },
   "manifest": "https://raw.githubusercontent.com/Caelvanost/pf1-settlements/main/module.json",
-  "download": "https://github.com/Caelvanost/pf1-settlements/releases/download/v2.6.1/pf1-settlements-v2.6.1.zip",
+  "download": "https://github.com/Caelvanost/pf1-settlements/releases/download/v2.6.2/pf1-settlements-v2.6.2.zip",
   "url": "https://github.com/Caelvanost/pf1-settlements"
 }
